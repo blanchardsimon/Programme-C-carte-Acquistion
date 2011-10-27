@@ -28,7 +28,8 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CLRSupport>true</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -78,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Acquisition_Board_Dll.h" />
+    <ClInclude Include="Acquisition_Configuration.h" />
     <ClInclude Include="Acquisition_Module.h" />
     <ClInclude Include="Acq_Board_Program_class.h" />
     <ClInclude Include="Acq_data_container_class.h" />
@@ -95,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Acquisition_Board_Dll.cpp" />
+    <ClCompile Include="Acquisition_Configuration.cpp" />
     <ClCompile Include="Acquisition_module.cpp" />
     <ClCompile Include="Acq_Board_Program_class.cpp" />
     <ClCompile Include="Acq_data_container_class.cpp" />

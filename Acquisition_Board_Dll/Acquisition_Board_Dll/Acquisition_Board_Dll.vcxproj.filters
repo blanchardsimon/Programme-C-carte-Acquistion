@@ -60,6 +60,9 @@
     <ClInclude Include="Acq_data_container_class.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Acquisition_Configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Acquisition_Board_Dll.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Acq_data_container_class.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Acquisition_Configuration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

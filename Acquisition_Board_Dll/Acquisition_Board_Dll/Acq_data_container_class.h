@@ -14,13 +14,13 @@
 #include "Acq_Define_Constant.h"
 #include "AppDll.h"
 #include "Pcie5vDefines.h"
+#include "Acquisition_Configuration.h"
 #include "Acq_Function.h"
 #include "Communication_Structure.h"
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <time.h>
-
 
 //**********************************************************************************************************************
 //													Class definition
@@ -30,6 +30,7 @@
 // Acq_Data_Container
 ////////////////////////////////////////////////////////////////////
 // Data container for all the module parameter, configuration and result
+
 class Acq_Data_Container
 {
 	// decalration of private member
@@ -60,6 +61,7 @@ class Acq_Data_Container
 		bool continuous_mode;	// continuous mode for oscilloscope and network analyser
 		bool test_mode;			// test mode, read data from a file for test purpose 
 		bool print_on_console;	// print result and stat on console
+		bool usb_clock_module_on; // if true activate the usb clock module
 		
 		double desire_clock_freq;	// desire clock freq for the acq_board
 
@@ -67,8 +69,8 @@ class Acq_Data_Container
 
 		dll_struct ultraview_dll;					// dll structure form ultraview
 		dll_struct *p_ultraview_dll;				// pointer to the dll structure
-		setup_struct ss;		// bord setup struction from ultraview
-		setup_struct * pss;				// pointer to the setup structure
+		//setup_struct ss;		// bord setup struction from ultraview
+		setup_struct* pss;				// pointer to the setup structure
 
 		// oscilloscope specific
 		double trigger_level;
@@ -85,7 +87,7 @@ class Acq_Data_Container
 		int tau_array[50];
 
 		// Result structure
-		Histogram_Result_struct *hist_result;
+		Histogram_Result_struct* hist_result;
 		unsigned __int64 *histogram_data_ptr;
 
 		Corr_Result_struct *corr_result;
@@ -99,7 +101,8 @@ class Acq_Data_Container
 		Acq_Data_Container();
 		~Acq_Data_Container();
 
-		void Set_Config(Acq_configuration* acq_config);
+		//void Set_Config(Acquisition_Board_Dll::Acquistion_Configuration acq_config);
 
 };
+
 #endif

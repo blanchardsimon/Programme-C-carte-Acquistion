@@ -15,6 +15,7 @@
 #include "AppDll.h"
 #include "Pcie5vDefines.h"
 #include "Communication_Structure.h"
+#include "Acquisition_Configuration.h"
 #include "Acq_Function.h"
 #include "Acq_data_container_class.h"
 #include "Acquisition_Module.h"
@@ -35,7 +36,9 @@
 // Acq_Board_Program
 ////////////////////////////////////////////////////////////////////
 // Class to controle, start and run the module for the acquisition board
-class Acq_Board_Program
+namespace Acquisition_Board_Dll{
+
+public ref class Acq_Board_Program
 {
 	// decalration of private member
 	private:
@@ -51,14 +54,67 @@ class Acq_Board_Program
 	public:
 
 		// class
-		Acq_Data_Container acq_data;
+			Acq_Data_Container* acq_data;
 
 		// methode
-		Acq_Board_Program();
-		~Acq_Board_Program();
+			Acq_Board_Program();
+			~Acq_Board_Program();
 
-		void Set_Config(Acq_configuration* acq_config);
-		void Start_Acq_Module();
+			void Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config);
+			void Start_Acq_Module();
+			
+			bool Get_Acq_Module_finish();
+
+			double Get_Progression();
+
+			unsigned char Read_Acquired_data(int index);
+			unsigned char Read_Oscilloscope_data_8bits(int index);
+			unsigned short Read_Oscilloscope_data_14bits(int index);
+
+			// histogram result fonction
+			double Get_Histogram_Result_executtime_sec();
+			unsigned __int64 Get_Histogram_Result_total_sample();
+			unsigned int Get_Histogram_Result_blocks_to_acquire();
+		
+			double Get_Histogram_Result_average();
+			double Get_Histogram_Result_variance();
+			double Get_Histogram_Result_skewness();
+
+			unsigned int Get_Histogram_Result_serial_number();
+			unsigned int Get_Histogram_Result_adc_res();
+			double Get_Histogram_Result_sampling_rate();
+
+			unsigned __int64 Read_Histogram_data(int index);
+
+			// Correlation result fonction
+			double Get_Correlation_Result_executtime_sec();
+			unsigned __int64 Get_Correlation_Result_total_sample();
+			unsigned int Get_Correlation_Result_blocks_to_acquire();
+
+			double Get_Correlation_Result_result_correlation(int tau_index);
+
+			unsigned int Get_Correlation_Result_serial_number();
+			unsigned int Get_Correlation_Result_adc_res();
+			double Get_Correlation_Result_sampling_rate();
+
+			// Network analyser function
+			double Get_Network_Result_executtime_sec();
+			unsigned int Get_Correlation_Network_blocks_to_acquire();
+
+			double Get_Network_Result_signalfreq();
+			double Get_Network_Result_ch1_amplitude();
+			double Get_Network_Result_ch1_phase();
+			double Get_Network_Result_ch2_amplitude();
+			double Get_Network_Result_ch2_phase();
+			double Get_Network_Result_attenuation();
+			double Get_Network_Result_attenuation_db();
+			double Get_Network_Result_phase_diff();
+
+			unsigned int Get_Network_Result_serial_number();
+			unsigned int Get_Network_Result_adc_res();
+			double Get_Network_Result_sampling_rate();
+
 };
+}
 
 #endif

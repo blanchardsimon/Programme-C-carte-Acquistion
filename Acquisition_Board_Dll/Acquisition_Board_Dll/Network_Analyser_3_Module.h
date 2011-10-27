@@ -83,7 +83,6 @@ class Network_Analyser_Module
 		bool start_lock_in_thread[4];
 		bool stop_lock_in_thread;
 
-
 		double sampling_rate;			// desire sampling rate
 		double signal_freq;				// suppose signal frequency
 		unsigned __int64 nb_sample_ch;	// number of sample per channel

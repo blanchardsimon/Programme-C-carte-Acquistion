@@ -1,5 +1,29 @@
 #pragma once
 
+// Configuration limit
+
+#define ADC_CLOCK_FREQ_8_MAX 1505.0
+#define ADC_CLOCK_FREQ_8_MIN 500.0
+#define ADC_CLOCK_FREQ_14_MAX 400.0
+#define ADC_CLOCK_FREQ_14_MIN 20.0
+
+#define BOARD_NUM_MAX 1
+
+#define BLOCKS_TO_ACQUIRE_MIN 32
+
+#define TRIGGER_LEVEL_14_MAX 0.375
+#define TRIGGER_LEVEL_14_MIN -0.375
+#define TRIGGER_LEVEL_8_MAX 0.35
+#define TRIGGER_LEVEL_8_MIN -0.35
+
+#define SAMPLE_TO_SEND_MAX 536870912
+#define SAMPLE_TO_SEND_BEFORE_TRIGGER_MAX 536870912
+
+#define SIGNAL_FREQ_8_MAX 375000000.0
+#define SIGNAL_FREQ_14_MAX 50000000.0
+
+
+
 //Configure this section to programme the application
 //#define NB_BLOCK_2_ACQ 1024
 #define NB_BLOCK_ON_ACQ_CARD 8192

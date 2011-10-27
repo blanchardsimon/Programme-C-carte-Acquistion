@@ -68,8 +68,21 @@ bool Acquistion_Configuration::Get_ADC_8bits()
 // Set_adc_clock_freq
 bool Acquistion_Configuration::Set_adc_clock_freq(double value)
 {
-	adc_clock_freq = value;
-	return true;
+	if(value > ADC_CLOCK_FREQ_8_MAX)
+	{
+		adc_clock_freq = ADC_CLOCK_FREQ_8_MAX;
+		return false;
+	}
+	else if(value < ADC_CLOCK_FREQ_14_MIN)
+	{
+		adc_clock_freq = ADC_CLOCK_FREQ_14_MIN;
+		return false;
+	}
+	else
+	{
+		adc_clock_freq = value;
+		return true;
+	}	
 }
 
 
@@ -89,8 +102,16 @@ double Acquistion_Configuration::Get_adc_clock_freq()
 // Set_op_mode
 bool Acquistion_Configuration::Set_op_mode(unsigned char value)
 {
-	op_mode = value;
-	return true;
+	if((value > 8) || (value < 1) || (value == 2))
+	{
+		op_mode = 0;
+		return false;
+	}
+	else
+	{
+		op_mode = value;
+		return true;
+	}
 }
 
 
@@ -188,8 +209,16 @@ bool Acquistion_Configuration::Get_usb_clock_module_on()
 // Set_board_num
 bool Acquistion_Configuration::Set_board_num(unsigned int value)
 {
-	board_num = value;
-	return true;
+	if(value > BOARD_NUM_MAX)
+	{
+		board_num = 0;
+		return false;
+	}
+	else
+	{
+		board_num = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -207,8 +236,16 @@ unsigned int Acquistion_Configuration::Get_board_num()
 // Set_blocks_to_acquire
 bool Acquistion_Configuration::Set_blocks_to_acquire(unsigned int value)
 {
-	blocks_to_acquire = value;
-	return true;
+	if(value < BLOCKS_TO_ACQUIRE_MIN 32)
+	{
+		blocks_to_acquire = BLOCKS_TO_ACQUIRE_MIN;
+		return false;
+	}
+	else
+	{
+		blocks_to_acquire = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -247,8 +284,22 @@ bool Acquistion_Configuration::Get_single_chan_mode()
 // Set_single_chan_select
 bool Acquistion_Configuration::Set_single_chan_select(unsigned int value)
 {
-	single_chan_select = value;
-	return true;
+	if(value == 1)
+	{
+		single_chan_select = 0;
+		return true;
+	}
+	else if(value == 2)
+	{
+		single_chan_select = 1;
+		return true;
+	}
+	else
+	{
+		single_chan_select = 0;
+		return false;
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -257,7 +308,14 @@ bool Acquistion_Configuration::Set_single_chan_select(unsigned int value)
 // Get_single_chan_select
 unsigned int Acquistion_Configuration::Get_single_chan_select()
 {
-	return single_chan_select;
+	if(single_chan_select == 0)
+	{
+		return 1;
+	}
+	else if(single_chan_select == 1)
+	{
+		return 2;
+	}
 }
 
 
@@ -364,8 +422,16 @@ bool Acquistion_Configuration::Get_adc_ecl_trigger_create()
 // Set_adc_deci_value
 bool Acquistion_Configuration::Set_adc_deci_value(unsigned int value)
 {
-	adc_deci_value = value;
-	return true;
+	if(value != 1)
+	{
+		adc_deci_value = 1;
+		return false;
+	}
+	else
+	{
+		adc_deci_value = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -403,8 +469,21 @@ bool Acquistion_Configuration::Get_software_stop()
 // Set_trigger_level
 bool Acquistion_Configuration::Set_trigger_level(double value)
 {
-	trigger_level = value;
-	return true;
+	if(value > TRIGGER_LEVEL_14_MAX)
+	{
+		trigger_level = TRIGGER_LEVEL_14_MAX;
+		return false;
+	}
+	else if(value < TRIGGER_LEVEL_14_MIN)
+	{
+		trigger_level = TRIGGER_LEVEL_14_MIN;
+		return false;
+	}
+	else
+	{
+		trigger_level = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -442,8 +521,16 @@ bool Acquistion_Configuration::Get_slope()
 // Set_sample_to_send
 bool Acquistion_Configuration::Set_sample_to_send(unsigned __int64 value)
 {
-	sample_to_send = value;
-	return true;
+	if(value > SAMPLE_TO_SEND_MAX)
+	{
+		sample_to_send = SAMPLE_TO_SEND_MAX;
+		return false;
+	}
+	else
+	{
+		sample_to_send = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -461,8 +548,16 @@ unsigned __int64 Acquistion_Configuration::Get_sample_to_send()
 // Set_sample_to_send_before_trigger
 bool Acquistion_Configuration::Set_sample_to_send_before_trigger(unsigned __int64 value)
 {
-	sample_to_send_before_trigger = value;
-	return true;
+	if(value > SAMPLE_TO_SEND_BEFORE_TRIGGER_MAX)
+	{
+		sample_to_send_before_trigger = SAMPLE_TO_SEND_BEFORE_TRIGGER_MAX;
+		return false;
+	}
+	else
+	{
+		sample_to_send_before_trigger = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -481,8 +576,16 @@ unsigned __int64 Acquistion_Configuration::Get_sample_to_send_before_trigger()
 // Set_trigger_channel_source
 bool Acquistion_Configuration::Set_trigger_channel_source(unsigned char value)
 {
-	trigger_channel_source = value;
-	return true;
+	if((value == 1) || (value == 2))
+	{
+		trigger_channel_source = value;
+		return true;
+	}
+	else
+	{
+		trigger_channel_source = 1;
+		return false;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -500,8 +603,16 @@ unsigned char Acquistion_Configuration::Get_trigger_channel_source()
 // Set_signal_freq
 bool Acquistion_Configuration::Set_signal_freq(double value)
 {
-	signal_freq = value;
-	return true;
+	if(value > SIGNAL_FREQ_8_MAX)
+	{
+		signal_freq = SIGNAL_FREQ_8_MAX;
+		return false;
+	}
+	else
+	{
+		signal_freq = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -520,8 +631,16 @@ double Acquistion_Configuration::Get_signal_freq()
 // Set_nb_tau
 bool Acquistion_Configuration::Set_nb_tau(unsigned char value)
 {
-	nb_tau = value;
-	return true;
+	if(value > 50)
+	{
+		nb_tau = 50;
+		return false;
+	}
+	else
+	{
+		nb_tau = value;
+		return true;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -539,8 +658,15 @@ unsigned char Acquistion_Configuration::Get_nb_tau()
 // Set_tau_array
 bool Acquistion_Configuration::Set_tau_array(unsigned int index, int value)
 {
-	tau_array[index] = value;
-	return true;
+	if(index <= 49)
+	{
+		tau_array[index] = value;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -549,7 +675,15 @@ bool Acquistion_Configuration::Set_tau_array(unsigned int index, int value)
 // Get_tau_array
 int Acquistion_Configuration::Get_tau_array(unsigned int index)
 {
-	return tau_array[index];
+	if(index <= 49)
+	{
+		return tau_array[index];
+	}
+	else
+	{
+		return 0;
+	}
+	
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -765,7 +899,7 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_block, uns
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
-	test = Set_single_chan_select(0);
+	test = Set_single_chan_select(1);
 		config_ok = config_ok & test;
 	test = Set_use_internal_clock(intclock);
 		config_ok = config_ok & test;
@@ -831,7 +965,7 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_block, unsi
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
-	test = Set_single_chan_select(0);
+	test = Set_single_chan_select(1);
 		config_ok = config_ok & test;
 	test = Set_use_internal_clock(intclock);
 		config_ok = config_ok & test;
@@ -897,7 +1031,7 @@ bool Acquistion_Configuration::Set_Network_Analyser(bool adc8bit, unsigned int b
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
-	test = Set_single_chan_select(0);
+	test = Set_single_chan_select(1);
 		config_ok = config_ok & test;
 	test = Set_use_internal_clock(intclock);
 		config_ok = config_ok & test;
@@ -991,4 +1125,5 @@ bool Acquistion_Configuration::Set_Oscilloscope(bool adc8bit, unsigned int board
 
 	return config_ok;
 }
+
 }

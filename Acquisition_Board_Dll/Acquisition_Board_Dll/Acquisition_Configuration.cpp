@@ -65,9 +65,28 @@ bool Acquistion_Configuration::Get_ADC_8bits()
 ////////////////////////////////////////////////////////////////////
 // Set_adc_clock_freq
 ////////////////////////////////////////////////////////////////////
-// Set_adc_clock_freq
+// set the desire clock freq. 
+// The desire clock freq is use by the usb clock module so it must be a multiple of 5
 bool Acquistion_Configuration::Set_adc_clock_freq(double value)
 {
+	double int_part;
+	double frac_part;
+	double quotien = value/5.0;
+
+	frac_part = modf(quotien,&int_part);
+
+	if(frac_part != 0.0)
+	{
+		if(frac_part >= 0.5)
+		{
+			value = ceil(quotien) * 5.0;
+		}
+		else
+		{
+			value = floor(quotien) * 5.0;
+		}
+	}
+	
 	if(value > ADC_CLOCK_FREQ_8_MAX)
 	{
 		adc_clock_freq = ADC_CLOCK_FREQ_8_MAX;
@@ -236,7 +255,7 @@ unsigned int Acquistion_Configuration::Get_board_num()
 // Set_blocks_to_acquire
 bool Acquistion_Configuration::Set_blocks_to_acquire(unsigned int value)
 {
-	if(value < BLOCKS_TO_ACQUIRE_MIN 32)
+	if(value < BLOCKS_TO_ACQUIRE_MIN)
 	{
 		blocks_to_acquire = BLOCKS_TO_ACQUIRE_MIN;
 		return false;
@@ -752,10 +771,21 @@ bool Acquistion_Configuration::Set_Acquisition(bool adc8bit, unsigned int nb_blo
 // Set_Histogram_14bits
 ////////////////////////////////////////////////////////////////////
 // Set_Histogram_14bits
-bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_block, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on)
+bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on)
 {
 	bool test;
 	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
 
 	test = Set_ADC_8bits(false);
 		config_ok = config_ok & test;
@@ -773,7 +803,7 @@ bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_block, unsig
 		config_ok = config_ok & test;
 	test = Set_board_num(board_nb);
 		config_ok = config_ok & test;
-	test = Set_blocks_to_acquire(nb_block);
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
@@ -813,10 +843,21 @@ bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_block, unsig
 // Set_Histogram_8bits
 ////////////////////////////////////////////////////////////////////
 // Set_Histogram_8bits
-bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_block, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on)
+bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on)
 {
 	bool test;
 	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
 
 	test = Set_ADC_8bits(true);
 		config_ok = config_ok & test;
@@ -834,7 +875,7 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_block, unsign
 		config_ok = config_ok & test;
 	test = Set_board_num(board_nb);
 		config_ok = config_ok & test;
-	test = Set_blocks_to_acquire(nb_block);
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
@@ -874,10 +915,21 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_block, unsign
 // Set_Correlation_14bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_14bits
-bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_block, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
 {
 	bool test;
 	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
 
 	test = Set_ADC_8bits(false);
 		config_ok = config_ok & test;
@@ -895,7 +947,7 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_block, uns
 		config_ok = config_ok & test;
 	test = Set_board_num(board_nb);
 		config_ok = config_ok & test;
-	test = Set_blocks_to_acquire(nb_block);
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;
@@ -940,10 +992,21 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_block, uns
 // Set_Correlation_8bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_8bits
-bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_block, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
 {
 	bool test;
 	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
 
 	test = Set_ADC_8bits(true);
 		config_ok = config_ok & test;
@@ -961,7 +1024,7 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_block, unsi
 		config_ok = config_ok & test;
 	test = Set_board_num(board_nb);
 		config_ok = config_ok & test;
-	test = Set_blocks_to_acquire(nb_block);
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;

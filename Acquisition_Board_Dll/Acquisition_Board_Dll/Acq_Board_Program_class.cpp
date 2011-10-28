@@ -43,66 +43,218 @@ Acq_Board_Program::~Acq_Board_Program()
 // Set_Config
 ////////////////////////////////////////////////////////////////////
 // Set the configuration and parameter for the next acquisition and pass it to the Acq_Data_Container class
-void Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config)
+int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config)
 {
-	if(!acq_data->continuous_mode)
+	int error_code = 0;
+
+	// delete the module if not in continous mode
+		if(!acq_data->continuous_mode)
+		{
+			if(acq_module_ptr != NULL)
+			{
+				delete acq_module_ptr;
+			}
+
+			if(hist_module_ptr != NULL)
+			{
+				delete hist_module_ptr;
+			}
+
+			if(corr_module_ptr != NULL)
+			{
+				delete corr_module_ptr;
+			}
+
+			if(osc_module_ptr != NULL)
+			{
+				delete osc_module_ptr;
+			}
+		}
+
+	// Set the data container
+		acq_data->pss->board_num				= acq_config->Get_board_num();
+		acq_data->pss->blocks_to_acquire		= acq_config->Get_blocks_to_acquire();
+		acq_data->pss->single_chan_mode			= acq_config->Get_single_chan_mode();
+		acq_data->pss->single_chan_select		= acq_config->Get_single_chan_select() - 1;
+		acq_data->pss->use_internal_clock		= acq_config->Get_use_internal_clock();
+		acq_data->pss->adc_ttl_trigger_invert	= acq_config->Get_adc_ttl_trigger_invert();
+		acq_data->pss->adc_ttl_trigger_edge_en	= acq_config->Get_adc_ttl_trigger_edge_en();
+		acq_data->pss->adc_ecl_trigger_await	= acq_config->Get_adc_ecl_trigger_await();
+		acq_data->pss->adc_ecl_trigger_create	= acq_config->Get_adc_ecl_trigger_create();
+		acq_data->pss->software_stop			= acq_config->Get_software_stop();
+		acq_data->pss->adc_deci_value			= acq_config->Get_adc_deci_value();
+
+		acq_data->ADC_8bits						= acq_config->Get_ADC_8bits();
+		acq_data->op_mode						= acq_config->Get_op_mode();
+		acq_data->desire_clock_freq				= acq_config->Get_adc_clock_freq();
+		acq_data->trigger_level					= acq_config->Get_trigger_level();
+		acq_data->sample_to_send				= acq_config->Get_sample_to_send();
+		acq_data->sample_to_send_before_trigger	= acq_config->Get_sample_to_send_before_trigger();
+		acq_data->slope							= acq_config->Get_slope();
+		acq_data->trigger_channel_source		= acq_config->Get_trigger_channel_source();
+		acq_data->signal_freq					= acq_config->Get_signal_freq();
+		acq_data->nb_tau						= acq_config->Get_nb_tau();
+		acq_data->test_mode						= acq_config->Get_test_mode();
+		acq_data->print_on_console				= acq_config->Get_print_on_console();
+		acq_data->usb_clock_module_on			= acq_config->Get_usb_clock_module_on();
+		acq_data->continuous_mode				= acq_config->Get_continuous_mode();
+
+		for(unsigned int i=0; i<50; i++)
+		{
+			acq_data->tau_array[i] = acq_config->Get_tau_array(i);
+		}
+
+	// Check for configuration error
+
+		// Check if trigger_level is correct
+			if(acq_data->ADC_8bits)
+			{
+				if(acq_data->trigger_level > TRIGGER_LEVEL_8_MAX)
+				{
+					acq_data->trigger_level = TRIGGER_LEVEL_8_MAX;
+					error_code = 1;
+				}
+				else if(acq_data->trigger_level < TRIGGER_LEVEL_8_MIN)
+				{
+					acq_data->trigger_level = TRIGGER_LEVEL_8_MIN;
+					error_code = 1;
+				}
+			}
+			else
+			{
+				if(acq_data->trigger_level > TRIGGER_LEVEL_14_MAX)
+				{
+					acq_data->trigger_level = TRIGGER_LEVEL_14_MAX;
+					error_code = 1;
+				}
+				else if(acq_data->trigger_level < TRIGGER_LEVEL_14_MIN)
+				{
+					acq_data->trigger_level = TRIGGER_LEVEL_14_MIN;
+					error_code = 1;
+				}
+			}
+
+		// Check if desire clock freq is correct
+			if(acq_data->ADC_8bits)
+			{
+				if(acq_data->desire_clock_freq > ADC_CLOCK_FREQ_8_MAX)
+				{
+					acq_data->desire_clock_freq = ADC_CLOCK_FREQ_8_MAX;
+					error_code = 1;
+				}
+				else if(acq_data->desire_clock_freq < ADC_CLOCK_FREQ_8_MIN)
+				{
+					acq_data->desire_clock_freq = ADC_CLOCK_FREQ_8_MIN;
+					error_code = 1;
+				}
+			}
+			else
+			{
+				if(acq_data->desire_clock_freq > ADC_CLOCK_FREQ_14_MAX)
+				{
+					acq_data->desire_clock_freq = ADC_CLOCK_FREQ_14_MAX;
+					error_code = 1;
+				}
+				else if(acq_data->desire_clock_freq < ADC_CLOCK_FREQ_14_MIN)
+				{
+					acq_data->desire_clock_freq = ADC_CLOCK_FREQ_14_MIN;
+					error_code = 1;
+				}
+			}
+
+		// Check if desire_clock_freq fit usb module clock capacity
+			if(acq_data->usb_clock_module_on)
+			{
+				if(acq_data->desire_clock_freq < USB_MODULE_CLOCK_VALUE_MIN)
+				{
+					acq_data->desire_clock_freq = USB_MODULE_CLOCK_VALUE_MIN;
+					error_code = 1;
+				}
+			}
+
+			
+		// Check if usb and clock_internal_clock fit
+			if(acq_data->pss->use_internal_clock && acq_data->usb_clock_module_on)
+			{
+				acq_data->pss->use_internal_clock = 0;
+				acq_data->usb_clock_module_on = false;
+				error_code = 1;
+			}
+
+		// Check if ADC_8bits fit the op_mode
+			if(acq_data->op_mode == 3 && acq_data->ADC_8bits)
+			{
+				acq_data->ADC_8bits = false;
+				error_code = 1;
+			}
+
+			if(acq_data->op_mode == 4 && acq_data->ADC_8bits)
+			{
+				acq_data->ADC_8bits = false;
+				error_code = 1;
+			}
+
+			if(acq_data->op_mode == 5 && !acq_data->ADC_8bits)
+			{
+				acq_data->ADC_8bits = true;
+				error_code = 1;
+			}
+
+			if(acq_data->op_mode == 6 && !acq_data->ADC_8bits)
+			{
+				acq_data->ADC_8bits = true;
+				error_code = 1;
+			}
+
+		// Check if sample_to_send_before_trigger fit sample_to_send
+			if(acq_data->sample_to_send_before_trigger > acq_data->sample_to_send)
+			{
+				acq_data->sample_to_send_before_trigger = acq_data->sample_to_send;
+				error_code = 1;
+			}
+
+		// Check if nb_block fit the op_mode
+			if(acq_data->op_mode == 3 || acq_data->op_mode == 4 || acq_data->op_mode == 5 || acq_data->op_mode == 6)
+			{
+				double int_part;
+				double frac_part;
+				double quotien = ((double)acq_data->pss->blocks_to_acquire)/8192.0;
+
+				frac_part = modf(quotien,&int_part);
+
+				if(frac_part != 0.0)
+				{
+					if(frac_part >= 0.5)
+					{
+						acq_data->pss->blocks_to_acquire = (unsigned int)(ceil(quotien) * 8192.0);
+					}
+					else
+					{
+						acq_data->pss->blocks_to_acquire = (unsigned int)(floor(quotien) * 8192.0);
+					}
+
+					if(acq_data->pss->blocks_to_acquire == 0)
+					{
+						acq_data->pss->blocks_to_acquire = 8192;
+					}
+						
+					error_code = 1;
+				}
+			}
+
+
+
+
+	if(error_code == 0)
 	{
-		if(acq_module_ptr != NULL)
-		{
-			delete acq_module_ptr;
-		}
-
-		if(hist_module_ptr != NULL)
-		{
-			delete hist_module_ptr;
-		}
-
-		if(corr_module_ptr != NULL)
-		{
-			delete corr_module_ptr;
-		}
-
-		if(osc_module_ptr != NULL)
-		{
-			delete osc_module_ptr;
-		}
+		acq_data->config_ready = true;
+	}
+	else
+	{
+		acq_data->config_ready = false;
 	}
 
-
-	acq_data->pss->board_num					= acq_config->Get_board_num();
-	acq_data->pss->blocks_to_acquire			= acq_config->Get_blocks_to_acquire();
-	acq_data->pss->single_chan_mode			= acq_config->Get_single_chan_mode();
-	acq_data->pss->single_chan_select			= acq_config->Get_single_chan_select();
-	acq_data->pss->use_internal_clock			= acq_config->Get_use_internal_clock();
-	acq_data->pss->adc_ttl_trigger_invert		= acq_config->Get_adc_ttl_trigger_invert();
-	acq_data->pss->adc_ttl_trigger_edge_en	= acq_config->Get_adc_ttl_trigger_edge_en();
-	acq_data->pss->adc_ecl_trigger_await		= acq_config->Get_adc_ecl_trigger_await();
-	acq_data->pss->adc_ecl_trigger_create		= acq_config->Get_adc_ecl_trigger_create();
-	acq_data->pss->software_stop				= acq_config->Get_software_stop();
-	acq_data->pss->adc_deci_value				= acq_config->Get_adc_deci_value();
-
-	acq_data->ADC_8bits						= acq_config->Get_ADC_8bits();
-	acq_data->op_mode						= acq_config->Get_op_mode();
-	acq_data->desire_clock_freq				= acq_config->Get_adc_clock_freq();
-	acq_data->trigger_level					= acq_config->Get_trigger_level();
-	acq_data->sample_to_send				= acq_config->Get_sample_to_send();
-	acq_data->sample_to_send_before_trigger	= acq_config->Get_sample_to_send_before_trigger();
-	acq_data->slope							= acq_config->Get_slope();
-	acq_data->trigger_channel_source		= acq_config->Get_trigger_channel_source();
-	acq_data->signal_freq					= acq_config->Get_signal_freq();
-	acq_data->nb_tau						= acq_config->Get_nb_tau();
-	acq_data->test_mode						= acq_config->Get_test_mode();
-	acq_data->print_on_console				= acq_config->Get_print_on_console();
-	acq_data->usb_clock_module_on			= acq_config->Get_usb_clock_module_on();
-	acq_data->continuous_mode				= acq_config->Get_continuous_mode();
-
-	for(unsigned int i=0; i<50; i++)
-	{
-		acq_data->tau_array[i] = acq_config->Get_tau_array(i);
-	}
-
-	acq_data->config_ready = true;
-
+	return error_code;
 }
 
 

@@ -60,7 +60,7 @@ public ref class Acq_Board_Program
 			Acq_Board_Program();
 			~Acq_Board_Program();
 
-			void Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config);
+			int Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config);
 			void Start_Acq_Module();
 			
 			bool Get_Acq_Module_finish();

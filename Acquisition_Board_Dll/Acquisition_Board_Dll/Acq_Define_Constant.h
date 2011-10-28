@@ -22,6 +22,7 @@
 #define SIGNAL_FREQ_8_MAX 375000000.0
 #define SIGNAL_FREQ_14_MAX 50000000.0
 
+#define USB_MODULE_CLOCK_VALUE_MIN 140.0
 
 
 //Configure this section to programme the application

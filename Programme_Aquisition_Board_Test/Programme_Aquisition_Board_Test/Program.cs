@@ -14,21 +14,26 @@ namespace Programme_Aquisition_Board_Test
                 Acquisition_Board_Dll.Acq_Board_Program acqBoard = new Acquisition_Board_Dll.Acq_Board_Program();
                 Acquisition_Board_Dll.Acquistion_Configuration acqBoardConfiguration = new Acquisition_Board_Dll.Acquistion_Configuration();
 
-                //acqBoardConfiguration.Set_Histogram_8bits(8192, 0, 1500.0, 0, false, false);
 
-                //acqBoardConfiguration.Set_Correlation_8bits(8192, 0, 1500.0, false, false, 3);
+                //bool config_ok = acqBoardConfiguration.Set_Histogram_8bits(1, 0, 1500.0, 0, false, false);
+
+                //bool config_ok = acqBoardConfiguration.Set_Correlation_8bits(8, 0, 1500.0, false, false, 1);
                 //acqBoardConfiguration.Set_tau_array(0, 0);
                 //acqBoardConfiguration.Set_tau_array(1, -10);
                 //acqBoardConfiguration.Set_tau_array(2, 10);
 
-                //acqBoardConfiguration.Set_Network_Analyser(true, 0, 1500.0, false, false, 1000000.0);
+                bool config_ok = acqBoardConfiguration.Set_Network_Analyser(true, 0, 1500.0, false, false, 20000.0);
 
                 //acqBoardConfiguration.Set_Oscilloscope(true, 0, 1500.0, false, false, true, 0, 0.1, true, 1024, 0, 1);
-                
-                acqBoard.Set_Configuration(acqBoardConfiguration);
-                acqBoard.Start_Acq_Module();
-                
 
+                if (config_ok)
+                {
+                    int error = acqBoard.Set_Configuration(acqBoardConfiguration);
+                    if (error == 0)
+                    {
+                        acqBoard.Start_Acq_Module();
+                    }
+                }
 
                 //Console.WriteLine(value);
 

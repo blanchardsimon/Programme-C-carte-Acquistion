@@ -16,6 +16,7 @@
 #include "Pcie5vDefines.h"
 #include "Communication_Structure.h"
 #include "Acq_Function.h"
+#include <cmath>
 
 //**********************************************************************************************************************
 //													Class definition
@@ -153,13 +154,13 @@ public ref class Acquistion_Configuration
 
 		bool Set_Acquisition(bool adc8bit, unsigned int nb_block, unsigned int board_nb, double clockfreq, bool single_chan, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
-		bool Set_Histogram_14bits(unsigned int nb_block, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
+		bool Set_Histogram_14bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
-		bool Set_Histogram_8bits(unsigned int nb_block, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
+		bool Set_Histogram_8bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
-		bool Set_Correlation_14bits(unsigned int nb_block, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+		bool Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
 
-		bool Set_Correlation_8bits(unsigned int nb_block, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+		bool Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
 
 		bool Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, double gen_signal_freq);
 

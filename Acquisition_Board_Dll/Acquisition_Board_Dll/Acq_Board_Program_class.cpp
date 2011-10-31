@@ -93,6 +93,7 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 		acq_data->slope							= acq_config->Get_slope();
 		acq_data->trigger_channel_source		= acq_config->Get_trigger_channel_source();
 		acq_data->signal_freq					= acq_config->Get_signal_freq();
+		acq_data->lock_in_square_mode			= acq_config->Get_lock_in_square_mode();
 		acq_data->nb_tau						= acq_config->Get_nb_tau();
 		acq_data->test_mode						= acq_config->Get_test_mode();
 		acq_data->print_on_console				= acq_config->Get_print_on_console();
@@ -262,90 +263,119 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 // Start_Acq_Module()
 ////////////////////////////////////////////////////////////////////
 // Start a acquisition module depending on the configuration
-void Acq_Board_Program::Start_Acq_Module()
+int Acq_Board_Program::Start_Acq_Module()
 {
-	// wait for the current runnig module ton complete
-	while(!acq_data->config_ready || acq_data->acquire_run);
+	int error;
+	FT_STATUS status;
 
-
-	//Start the right thread depending of the operation mode
-
-		// Acquisition module
-		if(acq_data->op_mode == 1)
+	if(acq_data->config_ready && !acq_data->acquire_run)
+	{
+		// Start the usb clock if needed
+		if(acq_data->usb_clock_module_on)
 		{
-			if(acq_module_ptr == NULL)
+			if(usb_clock_module == NULL)
 			{
-				// Create the module
-					acq_module_ptr = new Acquisition_Module(acq_data);
+				usb_clock_module = new Windfreak_Module();
 			}
 
-			// Run the module
-			acq_module_ptr->Run_Module();
-
-			// Get the result
-			acq_data->acq_data_ptr = acq_module_ptr->Get_Data();
+			status = usb_clock_module->Set_Frequency(acq_data->desire_clock_freq);
+			status = usb_clock_module->Set_Out_Power(1);
+			status = usb_clock_module->Set_RF_Output_ON(true);
 		}
-		// firmware histogram
-		else if(acq_data->op_mode == 2)
-		{
 
-		}
-		// Histogram module
-		else if(acq_data->op_mode == 3 || acq_data->op_mode == 5)
-		{
-			// Create the module
-			hist_module_ptr = new Histogram_Module(acq_data);
+
+		//Start the right thread depending of the operation mode
+
+			// Acquisition module
+			if(acq_data->op_mode == 1)
+			{
+				if(acq_module_ptr == NULL)
+				{
+					// Create the module
+						acq_module_ptr = new Acquisition_Module(acq_data);
+				}
+
+				// Run the module
+				acq_module_ptr->Run_Module();
+
+				// Get the result
+				acq_data->acq_data_ptr = acq_module_ptr->Get_Data();
+			}
+			// firmware histogram
+			else if(acq_data->op_mode == 2)
+			{
+
+			}
+			// Histogram module
+			else if(acq_data->op_mode == 3 || acq_data->op_mode == 5)
+			{
+				// Create the module
+				hist_module_ptr = new Histogram_Module(acq_data);
 			
-			// Run the module
-			hist_module_ptr->Run_Module();
+				// Run the module
+				hist_module_ptr->Run_Module();
 
-			// Get the result
-			acq_data->hist_result = hist_module_ptr->Get_Result();
-			acq_data->histogram_data_ptr = hist_module_ptr->Get_Data();
-		}
-		// Correlation Module
-		else if(acq_data->op_mode == 4 || acq_data->op_mode == 6)
-		{
-			// Create the module
-			corr_module_ptr = new Correlation_Module(acq_data);
-
-			// Run the module
-			corr_module_ptr->Run_Module();
-
-			// Get the result
-			acq_data->corr_result = corr_module_ptr->Get_Result();
-		}
-		// Network Analyser module
-		else if(acq_data->op_mode == 7)
-		{
-			if(net_module_ptr == NULL)
+				// Get the result
+				acq_data->hist_result = hist_module_ptr->Get_Result();
+				acq_data->histogram_data_ptr = hist_module_ptr->Get_Data();
+			}
+			// Correlation Module
+			else if(acq_data->op_mode == 4 || acq_data->op_mode == 6)
 			{
 				// Create the module
-				net_module_ptr = new Network_Analyser_Module(acq_data);
+				corr_module_ptr = new Correlation_Module(acq_data);
+
+				// Run the module
+				corr_module_ptr->Run_Module();
+
+				// Get the result
+				acq_data->corr_result = corr_module_ptr->Get_Result();
 			}
-
-			// Run the module
-			net_module_ptr->Run_Module();
-
-			//Get the result
-			acq_data->netanal_result = net_module_ptr->Get_Result();
-
-		}
-		// Oscilloscope module
-		else if(acq_data->op_mode == 8)
-		{
-			if(net_module_ptr == NULL)
+			// Network Analyser module
+			else if(acq_data->op_mode == 7)
 			{
-				// Create the module
-				osc_module_ptr = new Oscilloscope_Module(acq_data);
+				if(net_module_ptr == NULL)
+				{
+					// Create the module
+					net_module_ptr = new Network_Analyser_Module(acq_data);
+				}
+
+				// Run the module
+				net_module_ptr->Run_Module();
+
+				//Get the result
+				acq_data->netanal_result = net_module_ptr->Get_Result();
+
 			}
+			// Oscilloscope module
+			else if(acq_data->op_mode == 8)
+			{
+				if(net_module_ptr == NULL)
+				{
+					// Create the module
+					osc_module_ptr = new Oscilloscope_Module(acq_data);
+				}
 
-			// Run the module
-			osc_module_ptr->Run_Module();
+				// Run the module
+				osc_module_ptr->Run_Module();
 
-			// Get the data
-			acq_data->osc_data_ptr = osc_module_ptr->Get_Data();
+				// Get the data
+				acq_data->osc_data_ptr = osc_module_ptr->Get_Data();
+			}
+		
+		// Sop the usb clock if needed
+		if(!acq_data->continuous_mode)
+		{
+			status = usb_clock_module->Set_Module_On(false);
 		}
+
+	}
+	else
+	{
+		return error;
+	}
+	
+	return error;
 }
 
 

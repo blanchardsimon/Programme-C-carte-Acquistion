@@ -62,6 +62,7 @@ public ref class Acquistion_Configuration
 
 		// Network Analyser specific
 			double signal_freq;
+			bool lock_in_square_mode;
 
 		// Correlation Specifique
 			unsigned char nb_tau;
@@ -145,6 +146,9 @@ public ref class Acquistion_Configuration
 
 		bool Set_signal_freq(double value);
 		double Get_signal_freq();
+
+		bool Set_lock_in_square_mode(bool value);
+		bool Get_lock_in_square_mode();
 
 		bool Set_nb_tau(unsigned char value);
 		unsigned char Get_nb_tau();

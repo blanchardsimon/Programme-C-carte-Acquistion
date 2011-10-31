@@ -81,6 +81,7 @@ class Acq_Data_Container
 
 		// Network Analyser specific
 		double signal_freq;
+		bool lock_in_square_mode;
 
 		// Correlation Specifique
 		unsigned char nb_tau;

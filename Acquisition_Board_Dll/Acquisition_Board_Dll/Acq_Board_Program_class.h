@@ -23,6 +23,8 @@
 #include "Histogram_Module.h"
 #include "Network_Analyser_3_Module.h"
 #include "Oscilloscope_Module.h"
+#include "ftd2xx.h"
+#include "windfreak_module.h"
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -55,13 +57,14 @@ public ref class Acq_Board_Program
 
 		// class
 			Acq_Data_Container* acq_data;
+			Windfreak_Module* usb_clock_module;
 
 		// methode
 			Acq_Board_Program();
 			~Acq_Board_Program();
 
 			int Set_Configuration(Acquisition_Board_Dll::Acquistion_Configuration^ acq_config);
-			void Start_Acq_Module();
+			int Start_Acq_Module();
 			
 			bool Get_Acq_Module_finish();
 

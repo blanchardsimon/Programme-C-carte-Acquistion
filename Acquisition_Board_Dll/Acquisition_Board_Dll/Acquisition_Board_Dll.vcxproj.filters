@@ -63,6 +63,12 @@
     <ClInclude Include="Acquisition_Configuration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="windfreak_module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ftd2xx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Acquisition_Board_Dll.cpp">
@@ -102,6 +108,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Acquisition_Configuration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="windfreak_module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

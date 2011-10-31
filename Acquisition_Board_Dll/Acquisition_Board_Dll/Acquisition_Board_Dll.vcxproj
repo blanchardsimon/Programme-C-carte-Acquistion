@@ -56,8 +56,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>ftd2xx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -88,12 +87,14 @@
     <ClInclude Include="AppDll.h" />
     <ClInclude Include="Communication_Structure.h" />
     <ClInclude Include="Correlation_Module.h" />
+    <ClInclude Include="ftd2xx.h" />
     <ClInclude Include="Histogram_Module.h" />
     <ClInclude Include="Network_Analyser_3_Module.h" />
     <ClInclude Include="Oscilloscope_Module.h" />
     <ClInclude Include="Pcie5vDefines.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="windfreak_module.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Acquisition_Board_Dll.cpp" />
@@ -112,6 +113,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="windfreak_module.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.ico" />

@@ -665,10 +665,21 @@ DWORD WINAPI LockIn_Thread_0(Network_Analyser_Module* net_module)
 
 			omega = 2*PI/net_module->ch1_gain;
 
-			for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+			if(net_module->acq_data->lock_in_square_mode)
 			{
-				a += ch1_ptr[i] * cos(omega*(double)i);
-				b += ch1_ptr[i] * sin(omega*(double)i);
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch1_ptr[i] * ch1_ptr[i] * cos(omega*(double)i);
+					b += ch1_ptr[i] * ch1_ptr[i] * sin(omega*(double)i);
+				}
+			}
+			else
+			{
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch1_ptr[i] * cos(omega*(double)i);
+					b += ch1_ptr[i] * sin(omega*(double)i);
+				}
 			}
 
 			net_module->a1[id] = a;
@@ -704,10 +715,21 @@ DWORD WINAPI LockIn_Thread_1(Network_Analyser_Module* net_module)
 
 			omega = 2*PI/net_module->ch1_gain;
 
-			for(unsigned int i = (net_module->nb_sample_ch/2); i < ((net_module->nb_sample_ch)); i++)
+			if(net_module->acq_data->lock_in_square_mode)
 			{
-				a += ch1_ptr[i] * cos(omega*(double)i);
-				b += ch1_ptr[i] * sin(omega*(double)i);
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch1_ptr[i] * ch1_ptr[i] * cos(omega*(double)i);
+					b += ch1_ptr[i] * ch1_ptr[i] * sin(omega*(double)i);
+				}
+			}
+			else
+			{
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch1_ptr[i] * cos(omega*(double)i);
+					b += ch1_ptr[i] * sin(omega*(double)i);
+				}
 			}
 
 			net_module->a1[id] = a;
@@ -741,10 +763,21 @@ DWORD WINAPI LockIn_Thread_2(Network_Analyser_Module* net_module)
 
 			omega = 2*PI/net_module->ch1_gain;
 
-			for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+			if(net_module->acq_data->lock_in_square_mode)
 			{
-				a += ch2_ptr[i] * cos(omega*(double)i);
-				b += ch2_ptr[i] * sin(omega*(double)i);
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch2_ptr[i] * ch2_ptr[i] * cos(omega*(double)i);
+					b += ch2_ptr[i] * ch2_ptr[i] * sin(omega*(double)i);
+				}
+			}
+			else
+			{
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch2_ptr[i] * cos(omega*(double)i);
+					b += ch2_ptr[i] * sin(omega*(double)i);
+				}
 			}
 
 			net_module->a2[id] = a;
@@ -779,10 +812,21 @@ DWORD WINAPI LockIn_Thread_3(Network_Analyser_Module* net_module)
 
 			omega = 2*PI/net_module->ch1_gain;
 
-			for(unsigned int i = (net_module->nb_sample_ch/2); i < ((net_module->nb_sample_ch)); i++)
+			if(net_module->acq_data->lock_in_square_mode)
 			{
-				a += ch2_ptr[i] * cos(omega*(double)i);
-				b += ch2_ptr[i] * sin(omega*(double)i);
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch2_ptr[i] * ch2_ptr[i] * cos(omega*(double)i);
+					b += ch2_ptr[i] * ch2_ptr[i] * sin(omega*(double)i);
+				}
+			}
+			else
+			{
+				for(unsigned int i = 0; i < ((net_module->nb_sample_ch)/2); i++)
+				{
+					a += ch2_ptr[i] * cos(omega*(double)i);
+					b += ch2_ptr[i] * sin(omega*(double)i);
+				}
 			}
 
 			net_module->a2[id] = a;

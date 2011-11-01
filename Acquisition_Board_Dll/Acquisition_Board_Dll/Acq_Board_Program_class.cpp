@@ -215,7 +215,7 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 			}
 
 		// Check if nb_block fit the op_mode
-			if(acq_data->op_mode == 3 || acq_data->op_mode == 4 || acq_data->op_mode == 5 || acq_data->op_mode == 6)
+			if(acq_data->op_mode == 4 || acq_data->op_mode == 5 || acq_data->op_mode == 6)
 			{
 				double int_part;
 				double frac_part;
@@ -237,6 +237,35 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 					if(acq_data->pss->blocks_to_acquire == 0)
 					{
 						acq_data->pss->blocks_to_acquire = 8192;
+					}
+						
+					error_code = 1;
+				}
+			}
+
+		// Check if nb_block fit the op_mode
+			if(acq_data->op_mode == 3)
+			{
+				double int_part;
+				double frac_part;
+				double quotien = ((double)acq_data->pss->blocks_to_acquire)/512.0;
+
+				frac_part = modf(quotien,&int_part);
+
+				if(frac_part != 0.0)
+				{
+					if(frac_part >= 0.5)
+					{
+						acq_data->pss->blocks_to_acquire = (unsigned int)(ceil(quotien) * 512.0);
+					}
+					else
+					{
+						acq_data->pss->blocks_to_acquire = (unsigned int)(floor(quotien) * 512.0);
+					}
+
+					if(acq_data->pss->blocks_to_acquire == 0)
+					{
+						acq_data->pss->blocks_to_acquire = 512;
 					}
 						
 					error_code = 1;
@@ -736,11 +765,6 @@ double Acq_Board_Program::Get_Network_Result_ch2_imaginary_part()
 {
 	return acq_data->netanal_result->ch2_imaginary_part;
 }
-
-
-
-
-
 
 
 }

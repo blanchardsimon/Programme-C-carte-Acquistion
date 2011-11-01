@@ -823,7 +823,7 @@ bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_iteration, u
 		config_ok = config_ok & test;
 	test = Set_board_num(board_nb);
 		config_ok = config_ok & test;
-	test = Set_blocks_to_acquire(nb_iteration * 8192);
+	test = Set_blocks_to_acquire(nb_iteration * 512);
 		config_ok = config_ok & test;
 	test = Set_single_chan_mode(false);
 		config_ok = config_ok & test;

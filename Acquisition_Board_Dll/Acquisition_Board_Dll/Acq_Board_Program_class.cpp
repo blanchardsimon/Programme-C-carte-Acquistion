@@ -701,6 +701,41 @@ double Acq_Board_Program::Get_Network_Result_sampling_rate()
 	return acq_data->netanal_result->sampling_rate;
 }
 
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch1_real_part()
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch1_real_part()
+double Acq_Board_Program::Get_Network_Result_ch1_real_part()
+{
+	return acq_data->netanal_result->ch1_real_part;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch2_real_part()
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch2_real_part()
+double Acq_Board_Program::Get_Network_Result_ch2_real_part()
+{
+	return acq_data->netanal_result->ch2_real_part;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch1_imaginary_part()
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch1_imaginary_part()
+double Acq_Board_Program::Get_Network_Result_ch1_imaginary_part()
+{
+	return acq_data->netanal_result->ch1_imaginary_part;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch2_imaginary_part()
+////////////////////////////////////////////////////////////////////
+// Get_Network_Result_ch2_imaginary_part()
+double Acq_Board_Program::Get_Network_Result_ch2_imaginary_part()
+{
+	return acq_data->netanal_result->ch2_imaginary_part;
+}
 
 
 

@@ -1089,7 +1089,7 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, 
 // Set_Network_Analyser
 ////////////////////////////////////////////////////////////////////
 // Set_Network_Analyser
-bool Acquistion_Configuration::Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, double gen_signal_freq)
+bool Acquistion_Configuration::Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, bool lock_in_square, double gen_signal_freq)
 {
 	bool test;
 	bool config_ok = true;
@@ -1139,6 +1139,8 @@ bool Acquistion_Configuration::Set_Network_Analyser(bool adc8bit, unsigned int b
 	test = Set_trigger_channel_source(1);
 		config_ok = config_ok & test;
 	test = Set_signal_freq(gen_signal_freq);
+		config_ok = config_ok & test;
+	test = Set_lock_in_square_mode(lock_in_square);
 		config_ok = config_ok & test;
 	test = Set_nb_tau(0);
 		config_ok = config_ok & test;

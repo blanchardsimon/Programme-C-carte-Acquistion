@@ -108,6 +108,11 @@ class Network_Analyser_Module
 		double attenuation_dB;
 		double phase_diff;
 
+		double ch1_real_part;
+		double ch1_imaginary_part;
+		double ch2_real_part;
+		double ch2_imaginary_part;
+
 		double a1[2];
 		double b1[2];
 		double a2[2];

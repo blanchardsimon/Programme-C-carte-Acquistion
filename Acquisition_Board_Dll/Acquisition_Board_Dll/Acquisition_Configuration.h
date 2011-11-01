@@ -166,7 +166,7 @@ public ref class Acquistion_Configuration
 
 		bool Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
 
-		bool Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, double gen_signal_freq);
+		bool Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on,bool lock_in_square ,double gen_signal_freq);
 
 		bool Set_Oscilloscope(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, bool single_chan, unsigned int chan_nb, double trig_level, bool trig_slope, unsigned __int64 nb_sample, unsigned __int64 nb_sample_before_trigger, unsigned char trig_chan_src);
 

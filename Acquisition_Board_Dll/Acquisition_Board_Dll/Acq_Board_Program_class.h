@@ -117,6 +117,11 @@ public ref class Acq_Board_Program
 			unsigned int Get_Network_Result_adc_res();
 			double Get_Network_Result_sampling_rate();
 
+			double Get_Network_Result_ch1_real_part();
+			double Get_Network_Result_ch2_real_part();
+			double Get_Network_Result_ch1_imaginary_part();
+			double Get_Network_Result_ch2_imaginary_part();
+
 };
 }
 

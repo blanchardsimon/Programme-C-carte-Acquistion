@@ -184,6 +184,11 @@ typedef struct
 	double ch2_amplitude;
 	double ch2_phase;
 
+	double ch1_real_part;
+	double ch1_imaginary_part;
+	double ch2_real_part;
+	double ch2_imaginary_part;
+	
 	double attenuation;
 	double attenuation_db;
 	double phase_diff;

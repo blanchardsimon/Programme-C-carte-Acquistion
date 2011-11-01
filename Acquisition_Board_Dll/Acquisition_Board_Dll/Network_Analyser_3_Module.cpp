@@ -349,6 +349,12 @@ void Network_Analyser_Module::Compute_Result()
 	// Compute the attenuation
 		attenuation = ch2_amplitude/ch1_amplitude;
 		attenuation_dB = 20*log10(attenuation);
+
+	// store the real and imaginary part
+		ch1_real_part = tot_a1;
+		ch1_imaginary_part = tot_b1;
+		ch2_real_part = tot_a2;
+		ch2_imaginary_part = tot_b2;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -478,6 +484,10 @@ void Network_Analyser_Module::Store_Result()
 	net_anal_result.serial_number		= acq_data->pss->serial_number;
 	net_anal_result.sampling_rate		= sampling_rate;
 	net_anal_result.test_mode			= acq_data->test_mode;
+	net_anal_result.ch1_real_part		= ch1_real_part;
+	net_anal_result.ch2_real_part		= ch2_real_part;
+	net_anal_result.ch1_imaginary_part	= ch1_imaginary_part;
+	net_anal_result.ch2_imaginary_part	= ch2_imaginary_part;
 }
 
 ////////////////////////////////////////////////////////////////////

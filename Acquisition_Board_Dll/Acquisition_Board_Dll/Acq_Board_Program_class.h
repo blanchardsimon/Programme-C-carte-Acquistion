@@ -95,6 +95,8 @@ public ref class Acq_Board_Program
 			unsigned int Get_Correlation_Result_blocks_to_acquire();
 
 			double Get_Correlation_Result_result_correlation(int tau_index);
+			double Get_Correlation_Result_result_ch1_autocorr(int tau_index);
+			double Get_Correlation_Result_result_ch2_autocorr(int tau_index);
 
 			unsigned int Get_Correlation_Result_serial_number();
 			unsigned int Get_Correlation_Result_adc_res();

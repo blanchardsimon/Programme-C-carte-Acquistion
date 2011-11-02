@@ -99,6 +99,7 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 		acq_data->print_on_console				= acq_config->Get_print_on_console();
 		acq_data->usb_clock_module_on			= acq_config->Get_usb_clock_module_on();
 		acq_data->continuous_mode				= acq_config->Get_continuous_mode();
+		acq_data->autocorr_mode					= acq_config->Get_autocorr_mode();
 
 		for(unsigned int i=0; i<50; i++)
 		{
@@ -294,7 +295,7 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 // Start a acquisition module depending on the configuration
 int Acq_Board_Program::Start_Acq_Module()
 {
-	int error;
+	int error = 0;
 	FT_STATUS status;
 
 	if(acq_data->config_ready && !acq_data->acquire_run)
@@ -583,6 +584,24 @@ unsigned int Acq_Board_Program::Get_Correlation_Result_blocks_to_acquire()
 double Acq_Board_Program::Get_Correlation_Result_result_correlation(int tau_index)
 {
 	return acq_data->corr_result->result_correlation[tau_index];
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Correlation_Result_result_ch1_autocorr
+////////////////////////////////////////////////////////////////////
+// Get_Correlation_Result_result_ch1_autocorr
+double Acq_Board_Program::Get_Correlation_Result_result_ch1_autocorr(int tau_index)
+{
+	return acq_data->corr_result->result_ch1_autocorr[tau_index];
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Correlation_Result_result_ch2_autocorr
+////////////////////////////////////////////////////////////////////
+// Get_Correlation_Result_result_ch1_autocorr
+double Acq_Board_Program::Get_Correlation_Result_result_ch2_autocorr(int tau_index)
+{
+	return acq_data->corr_result->result_ch2_autocorr[tau_index];
 }
 
 ////////////////////////////////////////////////////////////////////

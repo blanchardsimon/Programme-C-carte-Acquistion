@@ -220,8 +220,8 @@ DWORD WINAPI Acquisition_Thread(Acquisition_Module* acq_module)
 {
 	int error = 0;
 	size_t mem_block;
-	TIME_VAR_TYPE test_time;
-	double execute_time;
+	//TIME_VAR_TYPE test_time;
+	//double execute_time;
 
 	while(!acq_module->Stop_acq_thread)
 	{

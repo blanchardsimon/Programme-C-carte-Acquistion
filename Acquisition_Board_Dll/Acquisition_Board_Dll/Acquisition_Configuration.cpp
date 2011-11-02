@@ -335,6 +335,10 @@ unsigned int Acquistion_Configuration::Get_single_chan_select()
 	{
 		return 2;
 	}
+	else
+	{
+		return 0;
+	}
 }
 
 
@@ -725,6 +729,26 @@ int Acquistion_Configuration::Get_tau_array(unsigned int index)
 	
 }
 
+
+////////////////////////////////////////////////////////////////////
+// Set_autocorr_mode
+////////////////////////////////////////////////////////////////////
+// Set_autocorr_mode
+bool Acquistion_Configuration::Set_autocorr_mode(bool value)
+{
+	autocorr_mode = value;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_autocorr_mode
+////////////////////////////////////////////////////////////////////
+// Get_autocorr_mode
+bool Acquistion_Configuration::Get_autocorr_mode()
+{
+	return autocorr_mode;
+}
+
 ////////////////////////////////////////////////////////////////////
 // Set_Acquisition
 ////////////////////////////////////////////////////////////////////
@@ -935,7 +959,7 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_iteration, un
 // Set_Correlation_14bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_14bits
-bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr)
 {
 	bool test;
 	bool config_ok = true;
@@ -999,6 +1023,8 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration,
 		config_ok = config_ok & test;
 	test = Set_nb_tau(nb_of_tau);
 		config_ok = config_ok & test;
+	test = Set_autocorr_mode(autocorr);
+		config_ok = config_ok & test;
 
 	for(unsigned int i = 0; i<nb_of_tau; i++)
 	{
@@ -1012,7 +1038,7 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration,
 // Set_Correlation_8bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_8bits
-bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr)
 {
 	bool test;
 	bool config_ok = true;
@@ -1076,11 +1102,14 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, 
 		config_ok = config_ok & test;
 	test = Set_nb_tau(nb_of_tau);
 		config_ok = config_ok & test;
+	test = Set_autocorr_mode(autocorr);
+		config_ok = config_ok & test;
 
 	for(unsigned int i = 0; i<nb_of_tau; i++)
 	{
 		tau_array[i] =  0;
 	}
+
 
 	return config_ok;
 }

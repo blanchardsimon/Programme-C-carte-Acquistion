@@ -150,7 +150,9 @@ typedef struct
 	unsigned int blocks_to_acquire;
 
 	unsigned char nb_tau; 
-	double	result_correlation[50];
+	double result_correlation[50];
+	double result_ch1_autocorr[50];
+	double result_ch2_autocorr[50];
 
 	unsigned int use_internal_clock;
 	unsigned int adc_ttl_trigger_invert;

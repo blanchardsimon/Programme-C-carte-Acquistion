@@ -496,7 +496,7 @@ void Network_Analyser_Module::Store_Result()
 // Run the network analyser module
 int Network_Analyser_Module::Run_Module()
 {
-	ULONG byte_read;
+	//ULONG byte_read;
 
 	if(acq_data->acquire_run)
 	{

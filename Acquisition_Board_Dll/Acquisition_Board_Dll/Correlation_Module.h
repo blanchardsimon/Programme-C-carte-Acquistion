@@ -84,13 +84,19 @@ class Correlation_Module
 		double executtime_sec;
 
 		unsigned __int64 total_sample;
-		__int64 correlation[NB_MAX_THREADS_CORR][NB_TAU_MAX];	// result for the intercorrelation on 14bits card for each thread
+		__int64 correlation[NB_MAX_THREADS_CORR][NB_TAU_MAX];	// result for the intercorrelation on card for each thread
+		__int64 ch1_autocorr[NB_MAX_THREADS_CORR][NB_TAU_MAX];
+		__int64 ch2_autocorr[NB_MAX_THREADS_CORR][NB_TAU_MAX];
 		unsigned __int64 sum_ch1[NB_MAX_THREADS_SUM];
 		unsigned __int64 sum_ch2[NB_MAX_THREADS_SUM];
 
 		// result of correlation
 		double result_correlation[NB_TAU_MAX];
+		double result_ch1_autocorr[NB_TAU_MAX];
+		double result_ch2_autocorr[NB_TAU_MAX];
 		double average;
+		double ch1_average;
+		double ch2_average;
 
 		// Methode
 		Correlation_Module(Acq_Data_Container * ptr);		// constructor

@@ -73,8 +73,9 @@ Correlation_Module::Correlation_Module(Acq_Data_Container* ptr)
 		for(unsigned int j = 0; j < NB_TAU_MAX; j++)
 		{
 			correlation[i][j] = 0;
+			ch1_autocorr[i][j] = 0;
+			ch2_autocorr[i][j] = 0;
 		}
-		
 	}
 
 	for(unsigned int i = 0; i<NB_MAX_THREADS_SUM; i++)
@@ -86,6 +87,8 @@ Correlation_Module::Correlation_Module(Acq_Data_Container* ptr)
 	for(unsigned int i = 0; i<NB_TAU_MAX; i++)
 	{
 		result_correlation[i] = 0;
+		result_ch1_autocorr[i] = 0;
+		result_ch2_autocorr[i] = 0;
 	}
 
 	average = 0;
@@ -102,9 +105,6 @@ Correlation_Module::Correlation_Module(Acq_Data_Container* ptr)
 		iteration_counter = 0;
 		nb_sample_iteration = 2048 * 1024.0 * 1024.0;
 	}
-
-
-
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -141,7 +141,9 @@ void Correlation_Module::Compute_Corr_Result()
 	unsigned __int64 total_sum_ch1 = 0;
 	unsigned __int64 total_sum_ch2 = 0;
 
-	unsigned __int64 total_correlation[NB_TAU_MAX]; 
+	unsigned __int64 total_correlation[NB_TAU_MAX];
+	unsigned __int64 total_ch1_autocorr[NB_TAU_MAX];
+	unsigned __int64 total_ch2_autocorr[NB_TAU_MAX];
 
 
 	// Compute the sum of ch1 and ch2
@@ -157,28 +159,36 @@ void Correlation_Module::Compute_Corr_Result()
 	for(unsigned int i = 0; i<acq_data->nb_tau; i++)
 	{
 		total_correlation[i] = 0;
+		total_ch1_autocorr[i] = 0;
+		total_ch2_autocorr[i] = 0;
 
 		for(unsigned int j = 0; j<NB_MAX_THREADS_CORR; j++)
 		{
 			total_correlation[i] +=  correlation[j][i];
+			total_ch1_autocorr[i] += ch1_autocorr[j][i];
+			total_ch2_autocorr[i] += ch2_autocorr[j][i];
 			correlation[j][i] = 0;
+			ch1_autocorr[j][i] = 0;
+			ch2_autocorr[j][i] = 0;
 		}
 	}
 
-	// Compute the average
-	//double N=double(nb_sample_iteration);
-	//average=double(total_sum_ch1)*double(total_sum_ch2)/N;
-	
-
 	average =  (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch1;
 	average = average * (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch2;
+
+	ch1_average =  (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch1;
+	ch1_average = ch1_average * (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch1;
+
+	ch2_average =  (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch2;
+	ch2_average = ch2_average * (1.0/((double)(nb_sample_iteration))) * (double)total_sum_ch2;
 
 
 	// Compute the correlation and acumulate it
 	for(unsigned int i=0; i<acq_data->nb_tau ; i++)
 	{
-			result_correlation[i] += ((1.0/((double)(nb_sample_iteration))) * (double)total_correlation[i]) - average;
-			//result_correlation[i] += (double(total_correlation[i]) - average)/N;
+		result_correlation[i] += ((1.0/((double)(nb_sample_iteration))) * (double)total_correlation[i]) - average;
+		result_ch1_autocorr[i] += ((1.0/((double)(nb_sample_iteration))) * (double)total_ch1_autocorr[i]) - ch1_average;
+		result_ch2_autocorr[i] += ((1.0/((double)(nb_sample_iteration))) * (double)total_ch2_autocorr[i]) - ch2_average;
 	}
 
 	iteration_counter++;
@@ -188,6 +198,8 @@ void Correlation_Module::Compute_Corr_Result()
 		for(unsigned int i=0; i<acq_data->nb_tau ; i++)
 		{
 			result_correlation[i] = result_correlation[i] * 1.0/((double)nb_iteration);
+			result_ch1_autocorr[i] = result_ch1_autocorr[i] * 1.0/((double)nb_iteration);
+			result_ch2_autocorr[i] = result_ch2_autocorr[i] * 1.0/((double)nb_iteration);
 		}
 	}
 
@@ -428,8 +440,22 @@ void Correlation_Module::Display_Result()
 	
 	for(unsigned int i =0; i<acq_data->nb_tau; i++)
 	{
-		printf("result tau %d : %f\n",acq_data->tau_array[i],result_correlation[i]);
+		printf("corr result tau %d : %f\n",acq_data->tau_array[i],result_correlation[i]);
 	}
+
+	if(acq_data->autocorr_mode)
+	{
+		for(unsigned int i =0; i<acq_data->nb_tau; i++)
+		{
+			printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+		}
+
+		for(unsigned int i =0; i<acq_data->nb_tau; i++)
+		{
+			printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+		}
+	}
+
 	printf("\n");
 }
 
@@ -461,6 +487,8 @@ void Correlation_Module::Store_Result()
 		if(i < acq_data->nb_tau)
 		{
 			corr_result.result_correlation[i] = result_correlation[i];
+			corr_result.result_ch1_autocorr[i] = result_ch1_autocorr[i];
+			corr_result.result_ch2_autocorr[i] = result_ch2_autocorr[i];
 		}
 		else
 		{
@@ -1469,6 +1497,8 @@ DWORD WINAPI Work_Thread_Corr8_0(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -1539,20 +1569,38 @@ DWORD WINAPI Work_Thread_Corr8_0(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
-
-
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 			}
 
 			#if(DISPLAY_TIME == 1)
@@ -1575,6 +1623,8 @@ DWORD WINAPI Work_Thread_Corr8_1(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -1645,18 +1695,38 @@ DWORD WINAPI Work_Thread_Corr8_1(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 
 			}
@@ -1681,6 +1751,8 @@ DWORD WINAPI Work_Thread_Corr8_2(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -1751,20 +1823,38 @@ DWORD WINAPI Work_Thread_Corr8_2(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
-
-
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 			}
 
 			#if(DISPLAY_TIME == 1)
@@ -1787,6 +1877,8 @@ DWORD WINAPI Work_Thread_Corr8_3(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -1857,18 +1949,38 @@ DWORD WINAPI Work_Thread_Corr8_3(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 
 			}
@@ -1893,6 +2005,8 @@ DWORD WINAPI Work_Thread_Corr8_4(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -1963,18 +2077,38 @@ DWORD WINAPI Work_Thread_Corr8_4(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 
 			}
@@ -1999,6 +2133,8 @@ DWORD WINAPI Work_Thread_Corr8_5(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2069,18 +2205,38 @@ DWORD WINAPI Work_Thread_Corr8_5(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 
 			}
@@ -2105,6 +2261,8 @@ DWORD WINAPI Work_Thread_Corr8_6(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2175,18 +2333,38 @@ DWORD WINAPI Work_Thread_Corr8_6(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 
 			}
@@ -2211,6 +2389,8 @@ DWORD WINAPI Work_Thread_Corr8_7(Correlation_Module * corr_module)
 	register unsigned char* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2281,19 +2461,38 @@ DWORD WINAPI Work_Thread_Corr8_7(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
-
 					corr_total = 0;
-
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2323,6 +2522,8 @@ DWORD WINAPI Work_Thread_Corr14_0(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2392,17 +2593,38 @@ DWORD WINAPI Work_Thread_Corr14_0(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2426,6 +2648,8 @@ DWORD WINAPI Work_Thread_Corr14_1(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2495,17 +2719,38 @@ DWORD WINAPI Work_Thread_Corr14_1(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2529,6 +2774,8 @@ DWORD WINAPI Work_Thread_Corr14_2(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2598,17 +2845,38 @@ DWORD WINAPI Work_Thread_Corr14_2(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2632,6 +2900,8 @@ DWORD WINAPI Work_Thread_Corr14_3(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2701,17 +2971,38 @@ DWORD WINAPI Work_Thread_Corr14_3(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2735,6 +3026,8 @@ DWORD WINAPI Work_Thread_Corr14_4(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2804,17 +3097,38 @@ DWORD WINAPI Work_Thread_Corr14_4(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2838,6 +3152,8 @@ DWORD WINAPI Work_Thread_Corr14_5(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -2907,17 +3223,38 @@ DWORD WINAPI Work_Thread_Corr14_5(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -2941,6 +3278,8 @@ DWORD WINAPI Work_Thread_Corr14_6(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -3010,17 +3349,38 @@ DWORD WINAPI Work_Thread_Corr14_6(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 
@@ -3044,6 +3404,8 @@ DWORD WINAPI Work_Thread_Corr14_7(Correlation_Module * corr_module)
 	register unsigned short* ch2_base_ptr;
 	
 	register unsigned __int64 corr_total = 0;
+	register unsigned __int64 ch1_auto_corr_total = 0;
+	register unsigned __int64 ch2_auto_corr_total = 0;
 
 	double executiontime;
 
@@ -3113,17 +3475,38 @@ DWORD WINAPI Work_Thread_Corr14_7(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						for(register unsigned int i = 0; i < length; i = i+2)
+						if(!corr_module->acq_data->autocorr_mode)
 						{
-							corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
+							}
+						}
+						else
+						{
+							register unsigned short  ch1_value;
+							register unsigned short  ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
 						}
 					}
 
 				// store the result for the current correlation
 					corr_module->correlation[id][z] += corr_total;
+					corr_module->ch1_autocorr[id][z] += ch1_auto_corr_total;
+					corr_module->ch2_autocorr[id][z] += ch2_auto_corr_total;
 
 				// reset the register
 					corr_total = 0;
+					ch1_auto_corr_total = 0;
+					ch2_auto_corr_total = 0;
 
 			}
 

@@ -86,6 +86,7 @@ class Acq_Data_Container
 		// Correlation Specifique
 		unsigned char nb_tau;
 		int tau_array[50];
+		bool autocorr_mode;
 
 		// Result structure
 		Histogram_Result_struct* hist_result;

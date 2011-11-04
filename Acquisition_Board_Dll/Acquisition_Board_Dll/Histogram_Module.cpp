@@ -532,24 +532,32 @@ DWORD WINAPI Gestion_Work_Hist_8bits(Histogram_Module * hist_module)
 	// main acquisition loop
 	for(unsigned int z=0; z<(hist_module->acq_data->pss->blocks_to_acquire/NB_BLOCK_ON_ACQ_CARD); z++)
 	{
-	
-		//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
-		number_of_block = hist_module->acq_data->pss->blocks_to_acquire;
-		hist_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
+		// first time configure the board and the other iterations do a 
+		// partial restart by reconfigure the number of block on the board 
+		//if(z == 0)
+		//{
+			//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
+			number_of_block = hist_module->acq_data->pss->blocks_to_acquire;
+			hist_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
 
-		// Call the DLL and select device number ss.board_num, if possible
-		x_SelectDevice(hist_module->acq_data->p_ultraview_dll, hist_module->acq_data->pss, hist_module->acq_data->pss->board_num);
+			// Call the DLL and select device number ss.board_num, if possible
+			x_SelectDevice(hist_module->acq_data->p_ultraview_dll, hist_module->acq_data->pss, hist_module->acq_data->pss->board_num);
 
-		// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
-		if(!hist_module->acq_data->p_ultraview_dll->hDllSetupBoard(hist_module->acq_data->pss))
-		{
-			//x_FreeMem(acq_data->buffer[0]);
-			printf("ERROR : unable to setup board\n");
-			//break;
-		}
+			// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
+			if(!hist_module->acq_data->p_ultraview_dll->hDllSetupBoard(hist_module->acq_data->pss))
+			{
+				//x_FreeMem(acq_data->buffer[0]);
+				printf("ERROR : unable to setup board\n");
+				//break;
+			}
 
-		//restore the correct number of block
-		hist_module->acq_data->pss->blocks_to_acquire = number_of_block;
+			//restore the correct number of block
+			hist_module->acq_data->pss->blocks_to_acquire = number_of_block;
+		//}
+		//else
+		//{
+			//hist_module->acq_data->p_ultraview_dll->hDllApiSetPioRegister(PIO_OFFSET_NUMBLOCKS,8192);
+		//}
 
 		// 8192 MB loop
 		for(unsigned int j=0; j<(NB_BLOCK_ON_ACQ_CARD/hist_module->Get_THREADS_BUFFER_MEM_LENGTH()); j++)

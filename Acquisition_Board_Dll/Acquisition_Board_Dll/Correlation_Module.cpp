@@ -625,24 +625,32 @@ DWORD WINAPI Gestion_Work_Corr_8bits(Correlation_Module * corr_module)
 	// main acquisition loop 8192 MB
 	for(unsigned int z=0; z<(corr_module->acq_data->pss->blocks_to_acquire/NB_BLOCK_ON_ACQ_CARD); z++)
 	{
-	
-		//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
-		number_of_block = corr_module->acq_data->pss->blocks_to_acquire;
-		corr_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
-
-		// Call the DLL and select device number ss.board_num, if possible
-		x_SelectDevice(corr_module->acq_data->p_ultraview_dll, corr_module->acq_data->pss, corr_module->acq_data->pss->board_num);
-
-		// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
-		if(!corr_module->acq_data->p_ultraview_dll->hDllSetupBoard(corr_module->acq_data->pss))
+		// first time configure the board and the other iterations do a 
+		// partial restart by reconfigure the number of block on the board 
+		if(z == 0)
 		{
-			//x_FreeMem(acq_data->buffer[0]);
-			printf("ERROR : unable to setup board\n");
-			//break;
-		}
+			//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
+			number_of_block = corr_module->acq_data->pss->blocks_to_acquire;
+			corr_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
 
-		//restore the correct number of block
-		corr_module->acq_data->pss->blocks_to_acquire = number_of_block;
+			// Call the DLL and select device number ss.board_num, if possible
+			x_SelectDevice(corr_module->acq_data->p_ultraview_dll, corr_module->acq_data->pss, corr_module->acq_data->pss->board_num);
+
+			// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
+			if(!corr_module->acq_data->p_ultraview_dll->hDllSetupBoard(corr_module->acq_data->pss))
+			{
+				//x_FreeMem(acq_data->buffer[0]);
+				printf("ERROR : unable to setup board\n");
+				//break;
+			}
+
+			//restore the correct number of block
+			corr_module->acq_data->pss->blocks_to_acquire = number_of_block;
+		}
+		else
+		{
+			corr_module->acq_data->p_ultraview_dll->hDllApiSetPioRegister(PIO_OFFSET_NUMBLOCKS,8192);
+		}
 
 		// 512 MB loop
 		for(unsigned int j=0; j<(NB_BLOCK_ON_ACQ_CARD/corr_module->Get_THREADS_BUFFER_MEM_LENGTH()); j++)
@@ -802,23 +810,31 @@ DWORD WINAPI Gestion_Work_Corr_14bits(Correlation_Module * corr_module)
 	for(unsigned int z=0; z<(corr_module->acq_data->pss->blocks_to_acquire/NB_BLOCK_ON_ACQ_CARD); z++)
 	{
 	
-		//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
-		number_of_block = corr_module->acq_data->pss->blocks_to_acquire;
-		corr_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
-
-		// Call the DLL and select device number ss.board_num, if possible
-		x_SelectDevice(corr_module->acq_data->p_ultraview_dll, corr_module->acq_data->pss, corr_module->acq_data->pss->board_num);
-
-		// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
-		if(!corr_module->acq_data->p_ultraview_dll->hDllSetupBoard(corr_module->acq_data->pss))
+		if(z == 0)
 		{
-			//x_FreeMem(acq_data->buffer[0]);
-			printf("ERROR : unable to setup board\n");
-			//break;
+			//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
+			number_of_block = corr_module->acq_data->pss->blocks_to_acquire;
+			corr_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
+
+			// Call the DLL and select device number ss.board_num, if possible
+			x_SelectDevice(corr_module->acq_data->p_ultraview_dll, corr_module->acq_data->pss, corr_module->acq_data->pss->board_num);
+
+			// Setup the board specified by ss.board_num for acquisition. SetupBoard will return false if the setup failed.
+			if(!corr_module->acq_data->p_ultraview_dll->hDllSetupBoard(corr_module->acq_data->pss))
+			{
+				//x_FreeMem(acq_data->buffer[0]);
+				printf("ERROR : unable to setup board\n");
+				//break;
+			}
+
+			//restore the correct number of block
+			corr_module->acq_data->pss->blocks_to_acquire = number_of_block;
+		}
+		else
+		{
+			corr_module->acq_data->p_ultraview_dll->hDllApiSetPioRegister(PIO_OFFSET_NUMBLOCKS,8192);
 		}
 
-		//restore the correct number of block
-		corr_module->acq_data->pss->blocks_to_acquire = number_of_block;
 
 		// 512 MB loop
 		for(unsigned int j=0; j<(NB_BLOCK_ON_ACQ_CARD/corr_module->Get_THREADS_BUFFER_MEM_LENGTH()); j++)

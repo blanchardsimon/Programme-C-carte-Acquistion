@@ -445,9 +445,9 @@ bool Acquistion_Configuration::Get_adc_ecl_trigger_create()
 // Set_adc_deci_value
 bool Acquistion_Configuration::Set_adc_deci_value(unsigned int value)
 {
-	if(value != 1)
+	if(value != 0)
 	{
-		adc_deci_value = 1;
+		adc_deci_value = 0;
 		return false;
 	}
 	else
@@ -790,7 +790,7 @@ bool Acquistion_Configuration::Set_Acquisition(bool adc8bit, unsigned int nb_blo
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
 	test = Set_software_stop(false);
 		config_ok = config_ok & test;
@@ -863,7 +863,7 @@ bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_iteration, u
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
 	test = Set_software_stop(true);
 		config_ok = config_ok & test;
@@ -921,7 +921,7 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_iteration, un
 		config_ok = config_ok & test;
 	test = Set_blocks_to_acquire(nb_iteration * 8192);
 		config_ok = config_ok & test;
-	test = Set_single_chan_mode(false);
+	test = Set_single_chan_mode(true);
 		config_ok = config_ok & test;
 	test = Set_single_chan_select(chan_nb);
 		config_ok = config_ok & test;
@@ -935,9 +935,9 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_iteration, un
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
-	test = Set_software_stop(true);
+	test = Set_software_stop(false);
 		config_ok = config_ok & test;
 	test = Set_trigger_level(0.0);
 		config_ok = config_ok & test;
@@ -1007,9 +1007,9 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration,
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
-	test = Set_software_stop(true);
+	test = Set_software_stop(false);
 		config_ok = config_ok & test;
 	test = Set_trigger_level(0.0);
 		config_ok = config_ok & test;
@@ -1086,9 +1086,9 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, 
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
-	test = Set_software_stop(true);
+	test = Set_software_stop(false);
 		config_ok = config_ok & test;
 	test = Set_trigger_level(0.0);
 		config_ok = config_ok & test;
@@ -1155,7 +1155,7 @@ bool Acquistion_Configuration::Set_Network_Analyser(bool adc8bit, unsigned int b
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
 	test = Set_software_stop(false);
 		config_ok = config_ok & test;
@@ -1218,7 +1218,7 @@ bool Acquistion_Configuration::Set_Oscilloscope(bool adc8bit, unsigned int board
 		config_ok = config_ok & test;
 	test = Set_adc_ecl_trigger_create(false);
 		config_ok = config_ok & test;
-	test = Set_adc_deci_value(1);
+	test = Set_adc_deci_value(0);
 		config_ok = config_ok & test;
 	test = Set_software_stop(false);
 		config_ok = config_ok & test;

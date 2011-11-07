@@ -68,6 +68,8 @@ public ref class Acquistion_Configuration
 			unsigned char nb_tau;
 			array<int,1>^ tau_array;
 			bool autocorr_mode;
+			bool corr_mode;
+			bool single_channel_auto_corr;
 
 	// decalration of public member
 	public:
@@ -160,15 +162,29 @@ public ref class Acquistion_Configuration
 		bool Set_autocorr_mode(bool value);
 		bool Get_autocorr_mode();
 
+		bool Set_corr_mode(bool value);
+		bool Get_corr_mode();
+
+		bool Set_single_channel_auto_corr(bool value);
+		bool Get_single_channel_auto_corr();
+
 		bool Set_Acquisition(bool adc8bit, unsigned int nb_block, unsigned int board_nb, double clockfreq, bool single_chan, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
 		bool Set_Histogram_14bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
 		bool Set_Histogram_8bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
-		bool Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr);
+		bool Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
 
-		bool Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr);
+		bool Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+
+		bool Set_Auto_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+
+		bool Set_Auto_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+
+		bool Set_Auto_and_Coor_14bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool auto_single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
+
+		bool Set_Auto_and_Coor_8bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool auto_single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau);
 
 		bool Set_Network_Analyser(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on,bool lock_in_square ,double gen_signal_freq);
 

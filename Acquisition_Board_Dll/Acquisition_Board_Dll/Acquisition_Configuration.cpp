@@ -729,7 +729,6 @@ int Acquistion_Configuration::Get_tau_array(unsigned int index)
 	
 }
 
-
 ////////////////////////////////////////////////////////////////////
 // Set_autocorr_mode
 ////////////////////////////////////////////////////////////////////
@@ -747,6 +746,44 @@ bool Acquistion_Configuration::Set_autocorr_mode(bool value)
 bool Acquistion_Configuration::Get_autocorr_mode()
 {
 	return autocorr_mode;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_coor_mode
+////////////////////////////////////////////////////////////////////
+// Set_coor_mode
+bool Acquistion_Configuration::Set_corr_mode(bool value)
+{
+	corr_mode = value;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_coor_mode
+////////////////////////////////////////////////////////////////////
+// Get_coor_mode
+bool Acquistion_Configuration::Get_corr_mode()
+{
+	return corr_mode;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_single_channel_auto_corr
+////////////////////////////////////////////////////////////////////
+// Set_single_channel_auto_corr
+bool Acquistion_Configuration::Set_single_channel_auto_corr(bool value)
+{
+	single_channel_auto_corr = value;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_single_channel_auto_corr
+////////////////////////////////////////////////////////////////////
+// Get_single_channel_auto_corr
+bool Acquistion_Configuration::Get_single_channel_auto_corr()
+{
+	return single_channel_auto_corr;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -849,7 +886,7 @@ bool Acquistion_Configuration::Set_Histogram_14bits(unsigned int nb_iteration, u
 		config_ok = config_ok & test;
 	test = Set_blocks_to_acquire(nb_iteration * 512);
 		config_ok = config_ok & test;
-	test = Set_single_chan_mode(false);
+	test = Set_single_chan_mode(true);
 		config_ok = config_ok & test;
 	test = Set_single_chan_select(chan_nb);
 		config_ok = config_ok & test;
@@ -959,7 +996,7 @@ bool Acquistion_Configuration::Set_Histogram_8bits(unsigned int nb_iteration, un
 // Set_Correlation_14bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_14bits
-bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr)
+bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
 {
 	bool test;
 	bool config_ok = true;
@@ -1023,7 +1060,9 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration,
 		config_ok = config_ok & test;
 	test = Set_nb_tau(nb_of_tau);
 		config_ok = config_ok & test;
-	test = Set_autocorr_mode(autocorr);
+	test = Set_autocorr_mode(false);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(true);
 		config_ok = config_ok & test;
 
 	for(unsigned int i = 0; i<nb_of_tau; i++)
@@ -1038,7 +1077,7 @@ bool Acquistion_Configuration::Set_Correlation_14bits(unsigned int nb_iteration,
 // Set_Correlation_8bits
 ////////////////////////////////////////////////////////////////////
 // Set_Correlation_8bits
-bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau, bool autocorr)
+bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb,  double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
 {
 	bool test;
 	bool config_ok = true;
@@ -1102,7 +1141,9 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, 
 		config_ok = config_ok & test;
 	test = Set_nb_tau(nb_of_tau);
 		config_ok = config_ok & test;
-	test = Set_autocorr_mode(autocorr);
+	test = Set_autocorr_mode(false);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(true);
 		config_ok = config_ok & test;
 
 	for(unsigned int i = 0; i<nb_of_tau; i++)
@@ -1110,6 +1151,338 @@ bool Acquistion_Configuration::Set_Correlation_8bits(unsigned int nb_iteration, 
 		tau_array[i] =  0;
 	}
 
+
+	return config_ok;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_Auto_Correlation_14bits
+////////////////////////////////////////////////////////////////////
+// Set_Auto_Correlation_14bits
+bool Acquistion_Configuration::Set_Auto_Correlation_14bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+{
+	bool test;
+	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
+
+	test = Set_ADC_8bits(false);
+		config_ok = config_ok & test;
+	test = Set_adc_clock_freq(clockfreq);
+		config_ok = config_ok & test;
+	test = Set_op_mode(4);
+		config_ok = config_ok & test;
+	test = Set_continuous_mode(false);
+		config_ok = config_ok & test;
+	test = Set_test_mode(false);
+		config_ok = config_ok & test;
+	test = Set_print_on_console(false);
+		config_ok = config_ok & test;
+	test = Set_usb_clock_module_on(usb_clk_mod_on);
+		config_ok = config_ok & test;
+	test = Set_board_num(board_nb);
+		config_ok = config_ok & test;
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
+		config_ok = config_ok & test;
+	test = Set_single_chan_mode(single_chan);
+		config_ok = config_ok & test;
+	test = Set_single_chan_select(chan_nb);
+		config_ok = config_ok & test;
+	test = Set_use_internal_clock(intclock);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_invert(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_edge_en(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_await(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_create(false);
+		config_ok = config_ok & test;
+	test = Set_adc_deci_value(0);
+		config_ok = config_ok & test;
+	test = Set_software_stop(false);
+		config_ok = config_ok & test;
+	test = Set_trigger_level(0.0);
+		config_ok = config_ok & test;
+	test = Set_slope(false);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send(0);
+		config_ok = config_ok & test;
+	test = Set_trigger_channel_source(1);
+		config_ok = config_ok & test;
+	test = Set_signal_freq(0.0);
+		config_ok = config_ok & test;
+	test = Set_nb_tau(nb_of_tau);
+		config_ok = config_ok & test;
+	test = Set_autocorr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(false);
+		config_ok = config_ok & test;
+	test = Set_single_channel_auto_corr(single_chan);
+		config_ok = config_ok & test;
+
+	for(unsigned int i = 0; i<nb_of_tau; i++)
+	{
+		tau_array[i] =  0;
+	}
+
+	return config_ok;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_Auto_Correlation_8bits
+////////////////////////////////////////////////////////////////////
+// Set_Auto_Correlation_8bits
+bool Acquistion_Configuration::Set_Auto_Correlation_8bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+{
+	bool test;
+	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
+
+	test = Set_ADC_8bits(true);
+		config_ok = config_ok & test;
+	test = Set_adc_clock_freq(clockfreq);
+		config_ok = config_ok & test;
+	test = Set_op_mode(6);
+		config_ok = config_ok & test;
+	test = Set_continuous_mode(false);
+		config_ok = config_ok & test;
+	test = Set_test_mode(false);
+		config_ok = config_ok & test;
+	test = Set_print_on_console(false);
+		config_ok = config_ok & test;
+	test = Set_usb_clock_module_on(usb_clk_mod_on);
+		config_ok = config_ok & test;
+	test = Set_board_num(board_nb);
+		config_ok = config_ok & test;
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
+		config_ok = config_ok & test;
+	test = Set_single_chan_mode(single_chan);
+		config_ok = config_ok & test;
+	test = Set_single_chan_select(chan_nb);
+		config_ok = config_ok & test;
+	test = Set_use_internal_clock(intclock);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_invert(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_edge_en(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_await(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_create(false);
+		config_ok = config_ok & test;
+	test = Set_adc_deci_value(0);
+		config_ok = config_ok & test;
+	test = Set_software_stop(false);
+		config_ok = config_ok & test;
+	test = Set_trigger_level(0.0);
+		config_ok = config_ok & test;
+	test = Set_slope(false);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send(0);
+		config_ok = config_ok & test;
+	test = Set_trigger_channel_source(1);
+		config_ok = config_ok & test;
+	test = Set_signal_freq(0.0);
+		config_ok = config_ok & test;
+	test = Set_nb_tau(nb_of_tau);
+		config_ok = config_ok & test;
+	test = Set_autocorr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(false);
+		config_ok = config_ok & test;
+	test = Set_single_channel_auto_corr(single_chan);
+		config_ok = config_ok & test;
+
+	for(unsigned int i = 0; i<nb_of_tau; i++)
+	{
+		tau_array[i] =  0;
+	}
+
+	return config_ok;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_Auto_&_Coor_14bits
+////////////////////////////////////////////////////////////////////
+// Set_Auto_&_Coor_14bits
+bool Acquistion_Configuration::Set_Auto_and_Coor_14bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool auto_single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+{
+	bool test;
+	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
+
+	test = Set_ADC_8bits(false);
+		config_ok = config_ok & test;
+	test = Set_adc_clock_freq(clockfreq);
+		config_ok = config_ok & test;
+	test = Set_op_mode(4);
+		config_ok = config_ok & test;
+	test = Set_continuous_mode(false);
+		config_ok = config_ok & test;
+	test = Set_test_mode(false);
+		config_ok = config_ok & test;
+	test = Set_print_on_console(false);
+		config_ok = config_ok & test;
+	test = Set_usb_clock_module_on(usb_clk_mod_on);
+		config_ok = config_ok & test;
+	test = Set_board_num(board_nb);
+		config_ok = config_ok & test;
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
+		config_ok = config_ok & test;
+	test = Set_single_chan_mode(false);
+		config_ok = config_ok & test;
+	test = Set_single_chan_select(chan_nb);
+		config_ok = config_ok & test;
+	test = Set_use_internal_clock(intclock);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_invert(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_edge_en(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_await(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_create(false);
+		config_ok = config_ok & test;
+	test = Set_adc_deci_value(0);
+		config_ok = config_ok & test;
+	test = Set_software_stop(false);
+		config_ok = config_ok & test;
+	test = Set_trigger_level(0.0);
+		config_ok = config_ok & test;
+	test = Set_slope(false);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send(0);
+		config_ok = config_ok & test;
+	test = Set_trigger_channel_source(1);
+		config_ok = config_ok & test;
+	test = Set_signal_freq(0.0);
+		config_ok = config_ok & test;
+	test = Set_nb_tau(nb_of_tau);
+		config_ok = config_ok & test;
+	test = Set_autocorr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_single_channel_auto_corr(auto_single_chan);
+		config_ok = config_ok & test;
+
+	for(unsigned int i = 0; i<nb_of_tau; i++)
+	{
+		tau_array[i] =  0;
+	}
+
+	return config_ok;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_Auto_&_Coor_8bits
+////////////////////////////////////////////////////////////////////
+// Set_Auto_&_Coor_8bits
+bool Acquistion_Configuration::Set_Auto_and_Coor_8bits(unsigned int nb_iteration, unsigned int board_nb, unsigned int chan_nb, bool auto_single_chan, double clockfreq, bool intclock, bool usb_clk_mod_on, unsigned char nb_of_tau)
+{
+	bool test;
+	bool config_ok = true;
+
+	// check if the number of iteration is correct
+	if(nb_iteration >= 1 && nb_iteration <= 524288)
+	{
+		config_ok = true;
+	}
+	else
+	{
+		nb_iteration = 1;
+		config_ok = false;
+	}
+
+	test = Set_ADC_8bits(true);
+		config_ok = config_ok & test;
+	test = Set_adc_clock_freq(clockfreq);
+		config_ok = config_ok & test;
+	test = Set_op_mode(6);
+		config_ok = config_ok & test;
+	test = Set_continuous_mode(false);
+		config_ok = config_ok & test;
+	test = Set_test_mode(false);
+		config_ok = config_ok & test;
+	test = Set_print_on_console(false);
+		config_ok = config_ok & test;
+	test = Set_usb_clock_module_on(usb_clk_mod_on);
+		config_ok = config_ok & test;
+	test = Set_board_num(board_nb);
+		config_ok = config_ok & test;
+	test = Set_blocks_to_acquire(nb_iteration * 8192);
+		config_ok = config_ok & test;
+	test = Set_single_chan_mode(false);
+		config_ok = config_ok & test;
+	test = Set_single_chan_select(chan_nb);
+		config_ok = config_ok & test;
+	test = Set_use_internal_clock(intclock);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_invert(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_edge_en(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_await(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_create(false);
+		config_ok = config_ok & test;
+	test = Set_adc_deci_value(0);
+		config_ok = config_ok & test;
+	test = Set_software_stop(false);
+		config_ok = config_ok & test;
+	test = Set_trigger_level(0.0);
+		config_ok = config_ok & test;
+	test = Set_slope(false);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send(0);
+		config_ok = config_ok & test;
+	test = Set_trigger_channel_source(1);
+		config_ok = config_ok & test;
+	test = Set_signal_freq(0.0);
+		config_ok = config_ok & test;
+	test = Set_nb_tau(nb_of_tau);
+		config_ok = config_ok & test;
+	test = Set_autocorr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_corr_mode(true);
+		config_ok = config_ok & test;
+	test = Set_single_channel_auto_corr(auto_single_chan);
+		config_ok = config_ok & test;
+
+	for(unsigned int i = 0; i<nb_of_tau; i++)
+	{
+		tau_array[i] =  0;
+	}
 
 	return config_ok;
 }

@@ -100,6 +100,9 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 		acq_data->usb_clock_module_on			= acq_config->Get_usb_clock_module_on();
 		acq_data->continuous_mode				= acq_config->Get_continuous_mode();
 		acq_data->autocorr_mode					= acq_config->Get_autocorr_mode();
+		acq_data->corr_mode						= acq_config->Get_corr_mode();
+		acq_data->single_channel_auto_corr		= acq_config->Get_single_channel_auto_corr();
+
 
 		for(unsigned int i=0; i<50; i++)
 		{

@@ -87,6 +87,8 @@ class Acq_Data_Container
 		unsigned char nb_tau;
 		int tau_array[50];
 		bool autocorr_mode;
+		bool corr_mode;
+		bool single_channel_auto_corr;
 
 		// Result structure
 		Histogram_Result_struct* hist_result;

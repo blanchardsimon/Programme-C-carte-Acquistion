@@ -438,22 +438,84 @@ void Correlation_Module::Display_Result()
 	printf("RESULTS\n");
 	printf("acquisition time : %f\n",acquire_time);
 	
-	for(unsigned int i =0; i<acq_data->nb_tau; i++)
+	if(acq_data->corr_mode && !acq_data->autocorr_mode)
 	{
-		printf("corr result tau %d : %f\n",acq_data->tau_array[i],result_correlation[i]);
+		for(unsigned int i =0; i<acq_data->nb_tau; i++)
+		{
+			printf("corr result tau %d : %f\n",acq_data->tau_array[i],result_correlation[i]);
+		}
 	}
+	else if(!acq_data->corr_mode && acq_data->autocorr_mode)
+	{
+		if(acq_data->single_channel_auto_corr)
+		{
+			if(acq_data->pss->single_chan_select == 0)
+			{
+				for(unsigned int i =0; i<acq_data->nb_tau; i++)
+				{
+					printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+				}
+			}
+			else
+			{
+				for(unsigned int i =0; i<acq_data->nb_tau; i++)
+				{
+					printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+				}
+			}
+		}
+		else
+		{
+			for(unsigned int i =0; i<acq_data->nb_tau; i++)
+			{
+				printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+			}
 
-	if(acq_data->autocorr_mode)
+			for(unsigned int i =0; i<acq_data->nb_tau; i++)
+			{
+				printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+			}
+		}
+
+	}
+	else if(acq_data->corr_mode && acq_data->autocorr_mode)
 	{
 		for(unsigned int i =0; i<acq_data->nb_tau; i++)
 		{
-			printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+			printf("corr result tau %d : %f\n",acq_data->tau_array[i],result_correlation[i]);
 		}
 
-		for(unsigned int i =0; i<acq_data->nb_tau; i++)
+		if(acq_data->single_channel_auto_corr)
 		{
-			printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+			if(acq_data->pss->single_chan_select == 0)
+			{
+				for(unsigned int i =0; i<acq_data->nb_tau; i++)
+				{
+					printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+				}
+			}
+			else
+			{
+				for(unsigned int i =0; i<acq_data->nb_tau; i++)
+				{
+					printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+				}
+			}
 		}
+		else
+		{
+			for(unsigned int i =0; i<acq_data->nb_tau; i++)
+			{
+				printf("ch1 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch1_autocorr[i]);
+			}
+
+			for(unsigned int i =0; i<acq_data->nb_tau; i++)
+			{
+				printf("ch2 auto result tau %d : %f\n",acq_data->tau_array[i],result_ch2_autocorr[i]);
+			}
+		}
+
+
 	}
 
 	printf("\n");
@@ -1585,14 +1647,14 @@ DWORD WINAPI Work_Thread_Corr8_0(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -1603,6 +1665,65 @@ DWORD WINAPI Work_Thread_Corr8_0(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -1711,14 +1832,14 @@ DWORD WINAPI Work_Thread_Corr8_1(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -1729,6 +1850,65 @@ DWORD WINAPI Work_Thread_Corr8_1(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -1839,14 +2019,14 @@ DWORD WINAPI Work_Thread_Corr8_2(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -1857,6 +2037,65 @@ DWORD WINAPI Work_Thread_Corr8_2(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -1965,14 +2204,14 @@ DWORD WINAPI Work_Thread_Corr8_3(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -1983,6 +2222,65 @@ DWORD WINAPI Work_Thread_Corr8_3(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -2093,14 +2391,14 @@ DWORD WINAPI Work_Thread_Corr8_4(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -2111,6 +2409,65 @@ DWORD WINAPI Work_Thread_Corr8_4(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -2221,14 +2578,14 @@ DWORD WINAPI Work_Thread_Corr8_5(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -2239,6 +2596,65 @@ DWORD WINAPI Work_Thread_Corr8_5(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -2349,14 +2765,14 @@ DWORD WINAPI Work_Thread_Corr8_6(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -2367,6 +2783,65 @@ DWORD WINAPI Work_Thread_Corr8_6(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}
@@ -2477,14 +2952,14 @@ DWORD WINAPI Work_Thread_Corr8_7(Correlation_Module * corr_module)
 				// second loop to iterate the correlation multiplication
 					if(corr_module->f_workthread_stop == 0)
 					{
-						if(!corr_module->acq_data->autocorr_mode)
+						if(!corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode)
 						{
 							for(register unsigned int i = 0; i < length; i = i+2)
 							{
 								corr_total += ch1_base_ptr[i] * ch2_base_ptr[i];
 							}
 						}
-						else
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
 						{
 							register unsigned char ch1_value;
 							register unsigned char ch2_value;
@@ -2495,6 +2970,65 @@ DWORD WINAPI Work_Thread_Corr8_7(Correlation_Module * corr_module)
 								ch2_value = ch2_base_ptr[i];
 								corr_total += ch1_value * ch2_value;
 								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								corr_total += ch1_value * ch2_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && !corr_module->acq_data->single_channel_auto_corr)
+						{
+							register unsigned char ch1_value;
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch2_value = ch2_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+								ch2_auto_corr_total += ch2_value * ch2_value;
+							}
+						}
+						else if(corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 0))
+						{
+							register unsigned char ch1_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch1_value = ch1_base_ptr[i];
+								ch1_auto_corr_total += ch1_value * ch1_value;
+							}
+						}
+						else if (corr_module->acq_data->autocorr_mode && !corr_module->acq_data->corr_mode && corr_module->acq_data->single_channel_auto_corr && (corr_module->acq_data->pss->single_chan_select == 1))
+						{
+							register unsigned char ch2_value;
+
+							for(register unsigned int i = 0; i < length; i = i+2)
+							{
+								ch2_value = ch2_base_ptr[i];
 								ch2_auto_corr_total += ch2_value * ch2_value;
 							}
 						}

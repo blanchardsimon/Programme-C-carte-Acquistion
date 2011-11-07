@@ -534,8 +534,8 @@ DWORD WINAPI Gestion_Work_Hist_8bits(Histogram_Module * hist_module)
 	{
 		// first time configure the board and the other iterations do a 
 		// partial restart by reconfigure the number of block on the board 
-		//if(z == 0)
-		//{
+		if(z == 0)
+		{
 			//Correct the number of block to acquire in the ss structure. The card must stop after after acquired the buffer length
 			number_of_block = hist_module->acq_data->pss->blocks_to_acquire;
 			hist_module->acq_data->pss->blocks_to_acquire = NB_BLOCK_ON_ACQ_CARD;
@@ -553,11 +553,11 @@ DWORD WINAPI Gestion_Work_Hist_8bits(Histogram_Module * hist_module)
 
 			//restore the correct number of block
 			hist_module->acq_data->pss->blocks_to_acquire = number_of_block;
-		//}
-		//else
-		//{
-			//hist_module->acq_data->p_ultraview_dll->hDllApiSetPioRegister(PIO_OFFSET_NUMBLOCKS,8192);
-		//}
+		}
+		else
+		{
+			hist_module->acq_data->p_ultraview_dll->hDllApiSetPioRegister(PIO_OFFSET_NUMBLOCKS,8192);
+		}
 
 		// 8192 MB loop
 		for(unsigned int j=0; j<(NB_BLOCK_ON_ACQ_CARD/hist_module->Get_THREADS_BUFFER_MEM_LENGTH()); j++)

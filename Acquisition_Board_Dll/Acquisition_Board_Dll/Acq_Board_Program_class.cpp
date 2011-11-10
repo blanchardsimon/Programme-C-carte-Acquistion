@@ -28,6 +28,7 @@ Acq_Board_Program::Acq_Board_Program()
 	corr_module_ptr = NULL;
 	osc_module_ptr = NULL;
 	net_module_ptr = NULL;
+	spec_module_ptr = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -69,6 +70,11 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 			{
 				delete osc_module_ptr;
 			}
+
+			if(spec_module_ptr != NULL)
+			{
+				delete spec_module_ptr;
+			}
 		}
 
 	// Set the data container
@@ -102,6 +108,7 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 		acq_data->autocorr_mode					= acq_config->Get_autocorr_mode();
 		acq_data->corr_mode						= acq_config->Get_corr_mode();
 		acq_data->single_channel_auto_corr		= acq_config->Get_single_channel_auto_corr();
+		acq_data->fft_length					= acq_config->Get_fft_length();
 
 
 		for(unsigned int i=0; i<50; i++)
@@ -276,6 +283,25 @@ int Acq_Board_Program::Set_Configuration(Acquisition_Board_Dll::Acquistion_Confi
 				}
 			}
 
+		// Check if the fft length fit the number of block
+			if(acq_data->op_mode == 9)
+			{
+				double int_part;
+				double frac_part;
+				double quotien;
+
+				quotien = (((double)acq_data->pss->blocks_to_acquire)*1024.0*1024.0)/((double)acq_data->fft_length);
+
+				frac_part = modf(quotien,&int_part);
+
+				if(frac_part != 0.0)
+				{
+					acq_data->pss->blocks_to_acquire = (unsigned int)((int_part + 1.0) * (double)acq_data->fft_length /(1024.0*1024.0));
+					error_code = 1;
+				}
+
+			}
+
 
 
 
@@ -395,8 +421,23 @@ int Acq_Board_Program::Start_Acq_Module()
 				// Get the data
 				acq_data->osc_data_ptr = osc_module_ptr->Get_Data();
 			}
+			else if(acq_data->op_mode == 9)
+			{
+				if(spec_module_ptr == NULL)
+				{
+					// Create the module
+					spec_module_ptr = new Spectrum_Analyzer_Module(acq_data);
+				}
+
+				// Run the Module
+				spec_module_ptr->Run_Module();
+
+				// Get the data
+				acq_data->ch1_spectrum_result = spec_module_ptr->Get_Result_ch1();
+				acq_data->ch2_spectrum_result = spec_module_ptr->Get_Result_ch2();
+			}
 		
-		// Sop the usb clock if needed
+		// Stop the usb clock if needed
 		if(!acq_data->continuous_mode)
 		{
 			status = usb_clock_module->Set_Module_On(false);
@@ -788,5 +829,22 @@ double Acq_Board_Program::Get_Network_Result_ch2_imaginary_part()
 	return acq_data->netanal_result->ch2_imaginary_part;
 }
 
+////////////////////////////////////////////////////////////////////
+// Get_Spectrum_Result_ch1
+////////////////////////////////////////////////////////////////////
+// Get_Spectrum_Result_ch1
+double Acq_Board_Program::Get_Spectrum_Result_ch1(int index)
+{
+	return acq_data->ch1_spectrum_result[index];
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_Spectrum_Result_ch2
+////////////////////////////////////////////////////////////////////
+// Get_Spectrum_Result_ch2
+double Acq_Board_Program::Get_Spectrum_Result_ch2(int index)
+{
+	return acq_data->ch2_spectrum_result[index];
+}
 
 }

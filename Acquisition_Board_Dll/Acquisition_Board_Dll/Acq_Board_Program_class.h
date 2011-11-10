@@ -23,6 +23,7 @@
 #include "Histogram_Module.h"
 #include "Network_Analyser_3_Module.h"
 #include "Oscilloscope_Module.h"
+#include "Spectrum_Analyzer_Module.h"
 #include "ftd2xx.h"
 #include "windfreak_module.h"
 #include <cmath>
@@ -51,6 +52,7 @@ public ref class Acq_Board_Program
 			Correlation_Module *corr_module_ptr;
 			Oscilloscope_Module *osc_module_ptr;
 			Network_Analyser_Module *net_module_ptr;
+			Spectrum_Analyzer_Module *spec_module_ptr;
 
 	// decalration of public member
 	public:
@@ -73,6 +75,8 @@ public ref class Acq_Board_Program
 			unsigned char Read_Acquired_data(int index);
 			unsigned char Read_Oscilloscope_data_8bits(int index);
 			unsigned short Read_Oscilloscope_data_14bits(int index);
+			double Get_Spectrum_Result_ch1(int index);
+			double Get_Spectrum_Result_ch2(int index);
 
 			// histogram result fonction
 			double Get_Histogram_Result_executtime_sec();
@@ -123,6 +127,8 @@ public ref class Acq_Board_Program
 			double Get_Network_Result_ch2_real_part();
 			double Get_Network_Result_ch1_imaginary_part();
 			double Get_Network_Result_ch2_imaginary_part();
+
+
 
 };
 }

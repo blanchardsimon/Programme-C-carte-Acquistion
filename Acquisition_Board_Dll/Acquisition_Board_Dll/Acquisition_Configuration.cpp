@@ -121,7 +121,7 @@ double Acquistion_Configuration::Get_adc_clock_freq()
 // Set_op_mode
 bool Acquistion_Configuration::Set_op_mode(unsigned char value)
 {
-	if((value > 8) || (value < 1) || (value == 2))
+	if((value > 9) || (value < 1) || (value == 2))
 	{
 		op_mode = 0;
 		return false;
@@ -275,7 +275,6 @@ unsigned int Acquistion_Configuration::Get_blocks_to_acquire()
 {
 	return blocks_to_acquire;
 }
-
 
 ////////////////////////////////////////////////////////////////////
 // Set_single_chan_mode
@@ -784,6 +783,48 @@ bool Acquistion_Configuration::Set_single_channel_auto_corr(bool value)
 bool Acquistion_Configuration::Get_single_channel_auto_corr()
 {
 	return single_channel_auto_corr;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_fft_length
+////////////////////////////////////////////////////////////////////
+// Set_fft_length
+bool Acquistion_Configuration::Set_fft_length(unsigned int value)
+{
+	double int_part;
+	double frac_part;
+
+	if(value < FFT_LENGTH_MIN)
+	{
+		value = FFT_LENGTH_MIN;
+		fft_length = value;
+		return false;
+	}
+
+	double power_base_2 = log10(((double)value)*1024.0*1024.0)/log10(2.0);
+
+	frac_part = modf(power_base_2,&int_part);
+
+	if(frac_part != 0.0)
+	{
+		value = (unsigned int)(pow(2.0,int_part + 1.0) / (1024.0*1024.0));
+		fft_length = value;
+		return false;
+	}
+	else
+	{
+		fft_length = value;
+		return true;
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+// Get_fft_length
+////////////////////////////////////////////////////////////////////
+// Get_fft_length
+unsigned int Acquistion_Configuration::Get_fft_length()
+{
+	return fft_length;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1608,6 +1649,71 @@ bool Acquistion_Configuration::Set_Oscilloscope(bool adc8bit, unsigned int board
 	test = Set_signal_freq(0.0);
 		config_ok = config_ok & test;
 	test = Set_nb_tau(0);
+		config_ok = config_ok & test;
+
+	return config_ok;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set_Spectrum_Analyzer
+////////////////////////////////////////////////////////////////////
+// Set_Spectrum_Analyzer
+bool Acquistion_Configuration::Set_Spectrum_Analyzer(bool adc8bit, unsigned int nb_block, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, bool single_chan, unsigned int chan_nb, unsigned int length_fft)
+{
+	bool test;
+	bool config_ok = true;
+
+	test = Set_ADC_8bits(adc8bit);
+		config_ok = config_ok & test;
+	test = Set_adc_clock_freq(clockfreq);
+		config_ok = config_ok & test;
+	test = Set_op_mode(9);
+		config_ok = config_ok & test;
+	test = Set_continuous_mode(false);
+		config_ok = config_ok & test;
+	test = Set_test_mode(false);
+		config_ok = config_ok & test;
+	test = Set_print_on_console(false);
+		config_ok = config_ok & test;
+	test = Set_usb_clock_module_on(usb_clk_mod_on);
+		config_ok = config_ok & test;
+	test = Set_board_num(board_nb);
+		config_ok = config_ok & test;
+	test = Set_blocks_to_acquire(nb_block);
+		config_ok = config_ok & test;
+	test = Set_single_chan_mode(single_chan);
+		config_ok = config_ok & test;
+	test = Set_single_chan_select(chan_nb);
+		config_ok = config_ok & test;
+	test = Set_use_internal_clock(intclock);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_invert(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ttl_trigger_edge_en(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_await(false);
+		config_ok = config_ok & test;
+	test = Set_adc_ecl_trigger_create(false);
+		config_ok = config_ok & test;
+	test = Set_adc_deci_value(0);
+		config_ok = config_ok & test;
+	test = Set_software_stop(false);
+		config_ok = config_ok & test;
+	test = Set_trigger_level(0.0);
+		config_ok = config_ok & test;
+	test = Set_slope(false);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send(0);
+		config_ok = config_ok & test;
+	test = Set_sample_to_send_before_trigger(0);
+		config_ok = config_ok & test;
+	test = Set_trigger_channel_source(1);
+		config_ok = config_ok & test;
+	test = Set_signal_freq(0.0);
+		config_ok = config_ok & test;
+	test = Set_nb_tau(0);
+		config_ok = config_ok & test;
+	test = Set_fft_length(length_fft);
 		config_ok = config_ok & test;
 
 	return config_ok;

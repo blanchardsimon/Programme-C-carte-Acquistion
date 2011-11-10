@@ -31,13 +31,14 @@ namespace Programme_Aquisition_Board_Test
 
                 //bool config_ok = acqBoardConfiguration.Set_Auto_and_Coor_8bits(2, 0, 1, true, 1500.0, false, false, 1);
 
-                bool config_ok = acqBoardConfiguration.Set_Auto_and_Coor_8bits(2, 0, 2, true, 1500.0, false, false, 1);
+                //bool config_ok = acqBoardConfiguration.Set_Auto_and_Coor_8bits(2, 0, 2, true, 1500.0, false, false, 1);
 
-                acqBoardConfiguration.Set_tau_array(0, 0);
-                acqBoardConfiguration.Set_tau_array(1, -2);
-                acqBoardConfiguration.Set_tau_array(2, 2);
+                //acqBoardConfiguration.Set_tau_array(0, 0);
+                //acqBoardConfiguration.Set_tau_array(1, -2);
+                //acqBoardConfiguration.Set_tau_array(2, 2);
 
-
+                bool config_ok = acqBoardConfiguration.Set_Spectrum_Analyzer(true, 32, 0, 1500.0, false, false, true, 1, 1024);
+                //config_ok = acqBoardConfiguration.Set_test_mode(true);
 
                 //bool config_ok = acqBoardConfiguration.Set_Network_Analyser(true, 0, 1500.0, false, false, 20000.0);
 

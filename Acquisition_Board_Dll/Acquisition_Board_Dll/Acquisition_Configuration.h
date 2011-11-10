@@ -71,6 +71,9 @@ public ref class Acquistion_Configuration
 			bool corr_mode;
 			bool single_channel_auto_corr;
 
+		//Spectrum Analyzer Specifique
+			unsigned int fft_length;
+
 	// decalration of public member
 	public:
 
@@ -168,6 +171,9 @@ public ref class Acquistion_Configuration
 		bool Set_single_channel_auto_corr(bool value);
 		bool Get_single_channel_auto_corr();
 
+		bool Set_fft_length(unsigned int value);
+		unsigned int Get_fft_length();
+
 		bool Set_Acquisition(bool adc8bit, unsigned int nb_block, unsigned int board_nb, double clockfreq, bool single_chan, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
 
 		bool Set_Histogram_14bits(unsigned int nb_iteration, unsigned int board_nb, double clockfreq, unsigned int chan_nb, bool intclock, bool usb_clk_mod_on);
@@ -190,7 +196,7 @@ public ref class Acquistion_Configuration
 
 		bool Set_Oscilloscope(bool adc8bit, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, bool single_chan, unsigned int chan_nb, double trig_level, bool trig_slope, unsigned __int64 nb_sample, unsigned __int64 nb_sample_before_trigger, unsigned char trig_chan_src);
 
-
+		bool Set_Spectrum_Analyzer(bool adc8bit, unsigned int nb_block, unsigned int board_nb, double clockfreq, bool intclock, bool usb_clk_mod_on, bool single_chan, unsigned int chan_nb, unsigned int length_fft);
 };
 
 }

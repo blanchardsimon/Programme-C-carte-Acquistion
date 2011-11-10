@@ -90,6 +90,9 @@ class Acq_Data_Container
 		bool corr_mode;
 		bool single_channel_auto_corr;
 
+		//Spectrum Analyzer Specifique
+		unsigned int fft_length;
+
 		// Result structure
 		Histogram_Result_struct* hist_result;
 		unsigned __int64 *histogram_data_ptr;
@@ -100,6 +103,10 @@ class Acq_Data_Container
 		unsigned char* osc_data_ptr;
 
 		NetAnal_Result_struct* netanal_result;
+
+		double* ch1_spectrum_result;
+		double* ch2_spectrum_result;
+
 
 		// Methode
 		Acq_Data_Container();

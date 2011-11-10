@@ -24,6 +24,8 @@
 
 #define USB_MODULE_CLOCK_VALUE_MIN 140.0
 
+#define FFT_LENGTH_MIN 512
+
 
 //Configure this section to programme the application
 //#define NB_BLOCK_2_ACQ 1024

@@ -36,6 +36,7 @@ typedef struct
 		// op_mode 6 = correlation 8 bit 
 		// op_mode 7 = Network analyser
 		// op_mode 8 = oscillocope
+		// op_mode 9 = Spectrum Analyzer
 	
 	bool ADC_8bits;			// tell that the board to use has an adc of 8bits, if false 14 bits
 	bool config_ready;		// tell the program that all the config data are ready and the board can be initialise

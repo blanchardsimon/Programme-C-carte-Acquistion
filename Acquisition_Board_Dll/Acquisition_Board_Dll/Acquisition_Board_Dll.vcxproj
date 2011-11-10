@@ -74,6 +74,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -84,15 +86,20 @@
     <ClInclude Include="Acq_data_container_class.h" />
     <ClInclude Include="Acq_Define_Constant.h" />
     <ClInclude Include="Acq_Function.h" />
+    <ClInclude Include="alglibinternal.h" />
+    <ClInclude Include="alglibmisc.h" />
+    <ClInclude Include="ap.h" />
     <ClInclude Include="AppDll.h" />
     <ClInclude Include="Communication_Structure.h" />
     <ClInclude Include="Correlation_Module.h" />
+    <ClInclude Include="fasttransforms.h" />
     <ClInclude Include="ftd2xx.h" />
     <ClInclude Include="Histogram_Module.h" />
     <ClInclude Include="Network_Analyser_3_Module.h" />
     <ClInclude Include="Oscilloscope_Module.h" />
     <ClInclude Include="Pcie5vDefines.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Spectrum_Analyzer_Module.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="windfreak_module.h" />
   </ItemGroup>
@@ -103,12 +110,17 @@
     <ClCompile Include="Acq_Board_Program_class.cpp" />
     <ClCompile Include="Acq_data_container_class.cpp" />
     <ClCompile Include="Acq_Function.cpp" />
+    <ClCompile Include="alglibinternal.cpp" />
+    <ClCompile Include="alglibmisc.cpp" />
+    <ClCompile Include="ap.cpp" />
     <ClCompile Include="AppDll.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Correlation_Module.cpp" />
+    <ClCompile Include="fasttransforms.cpp" />
     <ClCompile Include="Histogram_Module.cpp" />
     <ClCompile Include="Network_Analyser_3_Module.cpp" />
     <ClCompile Include="Oscilloscope_Module.cpp" />
+    <ClCompile Include="Spectrum_Analyzer_Module.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
